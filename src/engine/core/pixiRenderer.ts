@@ -1,6 +1,7 @@
 import { Engine } from "./engine";
 import { IRenderer } from "../interfaces/IRenderer";
-import { ILevel } from "../interfaces/ILevel";
+import { Level } from "./level";
+import { AssetLoader } from "./assetLoader";
 
 export class PIXIRenderer implements IRenderer {
 
@@ -10,6 +11,11 @@ export class PIXIRenderer implements IRenderer {
     private _pixiApp: PIXI.Application;
 
     /**
+     * The PIXI renderer that will be used to render the stage.
+     */
+    private _pixiRenderer: PIXI.Renderer;
+
+    /**
      * The main PIXI container associated with this renderer.
      */
     public readonly container: PIXI.Container;
@@ -17,7 +23,7 @@ export class PIXIRenderer implements IRenderer {
     /**
      * The levels currently attached to this renderer.
      */
-    public readonly levels: ILevel[];
+    public readonly levels: Level[];
 
     /**
      * Whether or not this renderer is currently active.
@@ -28,17 +34,23 @@ export class PIXIRenderer implements IRenderer {
      * Stands up a new canvas renderer.
      * @param levels The levels associated with this renderer.
      */
-    public constructor(levels: ILevel[]) {
+    public constructor(levels: Level[]) {
 
         // Stand up the PIXI application associated with this renderer.
         this._pixiApp = new PIXI.Application();
+        this._pixiRenderer = PIXI.autoDetectRenderer();
+
+        this._pixiApp.renderer.backgroundColor = 0xFFFFAA;
+        this._pixiApp.renderer.autoDensity = true;
+        this._pixiApp.renderer.resize(window.innerWidth, window.innerHeight);
 
         Engine.displayContainer.appendChild(this._pixiApp.view);
         this._pixiApp.resizeTo = Engine.displayContainer;
 
         // Assign the main container of the renderer as the core PIXI app stage.
         // All levels will have their root actor's container attached to the stage.
-        this.container = this._pixiApp.stage;
+        this.container = new PIXI.Container();
+        this._pixiApp.stage.addChild(this.container);
 
         // Now that the container is ready, we can create all of the levels.
         this.levels = [];
@@ -67,7 +79,7 @@ export class PIXIRenderer implements IRenderer {
      * Adds a level to this renderer.
      * @param theLevel The level to be added.
      */
-    public addLevel(theLevel: ILevel): void {
+    public addLevel(theLevel: Level): void {
         this.levels.push(theLevel);
         this.container.addChild(theLevel.root.container);
     }
@@ -78,7 +90,7 @@ export class PIXIRenderer implements IRenderer {
      * @returns True if the level was removed successfully. Failure to remove likely means the level wasn't
      *  attached to this renderer.
      */
-    public removeLevel(theLevel: ILevel): boolean {
+    public removeLevel(theLevel: Level): boolean {
         const levelIndex = this.levels.indexOf(theLevel);
         if (levelIndex >= 0) {
             return false;
@@ -93,6 +105,7 @@ export class PIXIRenderer implements IRenderer {
      * Draws the scene within the canvas.
      */
     public draw(): void {
-        //this._pixiApp.renderer.render
+        // this._pixiRenderer.render(this._pixiApp.stage);
+        this._pixiRenderer.render(this.container);
     }
 }

@@ -7,6 +7,11 @@ import { IDestroyable } from "../interfaces/IDestroyable";
 export abstract class Renderable implements IDestroyable {
 
     /**
+     * The asset data attached to this renderable's container.
+     */
+    protected _internalAssetData!: PIXI.Container;
+
+    /**
      * The container within to which this object's renderable objects are attached.
      */
     public readonly container: PIXI.Container;

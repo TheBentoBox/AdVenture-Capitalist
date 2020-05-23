@@ -1,4 +1,6 @@
-export abstract class Game {
+import { ITickable } from "../interfaces/ITickable";
+
+export abstract class Game implements ITickable {
 
     /**
      * The loaded game data which should be used to confgiure and run this game.
@@ -6,18 +8,22 @@ export abstract class Game {
     protected _gameData: any;
 
     /**
+     * Whether or not the game is currently active.
+     */
+    public isActive: boolean;
+
+    /**
      * Stands up a new game instance using the loaded game data.
      * @param gameData The gameData from the game config as loaded by the engine.
      */
     public constructor(gameData: any) {
         this._gameData = gameData;
-        this.onGameLoad(gameData);
+        this.isActive = true;
     }
 
     /**
-     * Called when the game is instantiated by the engine.
-     * @param gameData The configured game data for this game. What this should contain
-     *  is up to each extending game class.
+     * Performs update routines on the operating game class.
+     * @param deltaTime The time that has passed since the last tick
      */
-    public abstract onGameLoad(gameData: any): void;
+    public abstract update(deltaTime: number): void;
 }
