@@ -5,7 +5,7 @@ import { Actor } from "../../core/actor";
  * Represents a component which can be attached to an actor to perform operations against it or its display components.
  * They hold a reference to their owning actor and effectively control the behavior of that actor.
  */
-export abstract class BehavioralComponent implements ITickable {
+export abstract class TickingComponent implements ITickable {
 
     /**
      * The actor which this component acts upon.
@@ -13,12 +13,12 @@ export abstract class BehavioralComponent implements ITickable {
     public readonly actor: Actor;
 
     /**
-     * Whether or not this behavioral component is active, allowing it to tick.
+     * Whether or not this ticking component is active, allowing it to tick.
      */
     public isActive: boolean;
 
     /**
-     * Contructs a new behavioral component.
+     * Contructs a new ticking component.
      * @param theActor 
      */
     public constructor(theActor: Actor) {
@@ -27,7 +27,7 @@ export abstract class BehavioralComponent implements ITickable {
     }
 
     /**
-     * Performs the update routines of this behavioral component, operating on its targets within
+     * Performs the update routines of this ticking component, operating on its targets within
      * the associated owning actor.
      * @param deltaTime The time passed in seconds since the last tick.
      */

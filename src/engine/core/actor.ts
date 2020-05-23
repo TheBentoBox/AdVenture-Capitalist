@@ -1,5 +1,5 @@
 import { ITickable } from "../interfaces/ITickable";
-import { BehavioralComponent } from "../components/behavioral/behavioralComponent";
+import { TickingComponent } from "../components/ticking/tickingComponent";
 import { Renderable } from "./renderable";
 
 /**
@@ -19,13 +19,13 @@ export class Actor extends Renderable implements ITickable {
     public readonly children: Actor[];
 
     /**
-     * The behavioral components which operate on this actor's display components.
+     * The ticking components which operate on this actor's display components.
      */
-    public readonly behavioralComponents: BehavioralComponent[];
+    public readonly tickingComponents: TickingComponent[];
 
     /**
      * The display components representing the visual state of this object.
-     * These perform no update routines and should be controlled by behavioral components.
+     * These perform no update routines and should be controlled by ticking components.
      */
     public readonly displayComponents: Renderable[];
 
@@ -36,39 +36,39 @@ export class Actor extends Renderable implements ITickable {
         super();
 
         this.children = [];
-        this.behavioralComponents = [];
+        this.tickingComponents = [];
         this.displayComponents = [];
     }
 
     /**
-     * Adds a new behavioral component to this actor.
+     * Adds a new ticking component to this actor.
      * @param theComponent The component to be added.
      * @returns True if the component was added successfully. Failure to add generally indicates
      *  that the component is already attached to this actor.
      */
-    public addBehavioralComponent(theComponent: BehavioralComponent): boolean {
-        const componentIndex = this.behavioralComponents.indexOf(theComponent);
+    public addTickingComponent(theComponent: TickingComponent): boolean {
+        const componentIndex = this.tickingComponents.indexOf(theComponent);
         if (componentIndex >= 0) {
             return false;
         }
 
-        this.behavioralComponents.push(theComponent);
+        this.tickingComponents.push(theComponent);
         return true;
     }
 
     /**
-     * Removes a behavioral component from this actor.
+     * Removes a ticking component from this actor.
      * @param theComponent The component to be removed.
      * @returns True if the component was removed successfully. Failure to remove generally indicates
      *  that the component was not attached to this actor.
      */
-    public removeBehavioralComponent(theComponent: BehavioralComponent): boolean {
-        const componentIndex = this.behavioralComponents.indexOf(theComponent);
+    public removeTickingComponent(theComponent: TickingComponent): boolean {
+        const componentIndex = this.tickingComponents.indexOf(theComponent);
         if (componentIndex >= 0) {
             return false;
         }
 
-        this.behavioralComponents.splice(componentIndex, 1);
+        this.tickingComponents.splice(componentIndex, 1);
         return true;
     }
 
@@ -140,16 +140,16 @@ export class Actor extends Renderable implements ITickable {
     }
 
     /**
-     * Updates all behavioral components attached to this actor.
+     * Updates all ticking components attached to this actor.
      * @param deltaTime The amount of time that has passed in seconds since the last update tick.
      */
     public update(deltaTime: number): void {
-        for (const behavioralComponent of this.behavioralComponents) {
-            if (!behavioralComponent.isActive) {
+        for (const tickingComponent of this.tickingComponents) {
+            if (!tickingComponent.isActive) {
                 continue;
             }
 
-            behavioralComponent.update(deltaTime);
+            tickingComponent.update(deltaTime);
         }
     }
 }
