@@ -1,5 +1,5 @@
 import { ITickable } from "../interfaces/ITickable";
-import { Actor } from "../core/actor";
+import { Actor } from "./actor";
 
 /**
  * Represents a component which can be attached to an actor to perform operations against it or its display components.

@@ -30,6 +30,11 @@ export class Engine {
     private static _game: Game;
 
     /**
+     * The loaded game config.
+     */
+    private static _gameConfig: any;
+
+    /**
      * The DOM element which engine-created DOM elements should attach themselves to.
      */
     private static _displayContainer: HTMLElement;
@@ -56,21 +61,15 @@ export class Engine {
     }
 
     /**
-     * Registers the game that will be instantiated when the engine is ready.
-     * @param theGame 
+     * Begins the engine startup process.
+     * @param theGame The game class which should be instantiated when the game config is ready.
      */
-    public static registerGame(theGame: GameConstructor): void {
-        this._gameType = theGame;
-    }
-
-    /**
-     * Starts the main engine tick loop.
-     */
-    public static start(): void {
+    public static start(theGame: GameConstructor): void {
         if (Engine._state !== EngineState.IDLE) {
             throw new Error("Something tried to start the Engine while it was already running. This should not happen, and likely indicates a critical issue.")
         }
 
+        Engine._gameType = theGame;
         Engine._state = EngineState.STARTUP;
 
         // Retrieve the game container DOM element. This is required for the game to run.
@@ -102,11 +101,18 @@ export class Engine {
 
     /**
      * Callback for when the core game config has been loaded by the engine. This stands up the
-     * registered game class.
+     * registered game class if it has been registered yet.
      * @param loader The loader wh
-     * @param resources 
+     * @param loadedResources 
      */
-    private static onGameConfigLoaded(loader: PIXI.Loader, resources: Dictionary<any>): void {
-        Engine._game = new Engine._gameType(resources[Engine._gameConfigPath].data);
+    private static onGameConfigLoaded(loader: PIXI.Loader, loadedResources: Dictionary<any>): void {
+        console.log("Loaded:", loadedResources);
+        const gameConfig = loadedResources[Engine._gameConfigPath].data;
+        Engine._gameConfig = gameConfig;
+
+        if (Engine._gameType !== undefined) {
+            Engine._game = new Engine._gameType(gameConfig.gameData);
+            debugger;
+        }
     }
 }

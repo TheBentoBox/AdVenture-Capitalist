@@ -11,5 +11,13 @@ export abstract class Game {
      */
     public constructor(gameData: any) {
         this._gameData = gameData;
+        this.onGameLoad(gameData);
     }
+
+    /**
+     * Called when the game is instantiated by the engine.
+     * @param gameData The configured game data for this game. What this should contain
+     *  is up to each extending game class.
+     */
+    public abstract onGameLoad(gameData: any): void;
 }
