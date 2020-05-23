@@ -1,4 +1,18 @@
 {
-    "assets": [],
-    "gameData": {}
+    "assets": {
+        "assets/images/icon.png": "sprite",
+        "assets/images/cat.png": "sprite"
+    },
+    "gameData": {
+        "buyables": [
+            {
+                "image": "icon.png",
+                "basePrice": 10
+            },
+            {
+                "image": "cat.png",
+                "basePrice": 25
+            }
+        ]
+    }
 }
