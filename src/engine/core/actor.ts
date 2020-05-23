@@ -1,6 +1,5 @@
 import { ITickable } from "../interfaces/ITickable";
-import { BehavioralComponent } from "./behavioralComponent";
-import { Transform } from "../math/transform";
+import { BehavioralComponent } from "../components/behavioral/behavioralComponent";
 import { Renderable } from "./renderable";
 
 /**
