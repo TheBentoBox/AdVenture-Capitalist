@@ -18,4 +18,7 @@ module.exports = {
         filename: 'index.js',
         path: path.resolve(__dirname, 'dist'),
     },
+    externals: [
+        { "pixi.js": "PIXI" }
+    ]
 };
