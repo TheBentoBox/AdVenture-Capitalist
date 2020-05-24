@@ -33,14 +33,14 @@ export class PIXIRenderer implements IRenderer {
     /**
      * Stands up a new canvas renderer.
      * @param levels The levels associated with this renderer.
+     * @param rendererOptions The options to control how the renderer should work.
      */
-    public constructor(levels: Level[]) {
+    public constructor(levels: Level[], rendererOptions: any = {}) {
 
         // Stand up the PIXI application associated with this renderer.
-        this._pixiApp = new PIXI.Application();
+        this._pixiApp = new PIXI.Application(rendererOptions);
         this._pixiRenderer = PIXI.autoDetectRenderer();
 
-        this._pixiApp.renderer.backgroundColor = 0xFFFFAA;
         this._pixiApp.renderer.autoDensity = true;
         this._pixiApp.renderer.resize(window.innerWidth, window.innerHeight);
 

@@ -97,7 +97,6 @@ export class Engine {
         }
 
         Engine._displayContainer = displayContainer;
-        Engine._renderer = new PIXIRenderer([]);
 
         // Load the core game config.
         // If this fails to load, the game will not run.
@@ -126,6 +125,7 @@ export class Engine {
     private static onGameConfigLoaded(loader: PIXI.Loader, loadedResources: Dictionary<any>): void {
         const gameConfig = loadedResources[Engine._gameConfigPath].data;
         Engine._gameConfig = gameConfig;
+        Engine._renderer = new PIXIRenderer([], gameConfig.renderer);
 
         // Now that we have the core game config, enter the loading stage and load the configured required assets.
         Engine._state = EngineState.LOADING;
