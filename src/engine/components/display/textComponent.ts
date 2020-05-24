@@ -1,10 +1,11 @@
 import { DisplayComponent } from "./displayComponent";
 import { Observable } from "../../core/observable";
+import { Dictionary } from "../../core/types";
 
 /**
  * The data shape that gets passed into the display component constructor for configuration purposes.
  */
-type TextComponentData = { text: string }
+type TextComponentData = { text: string, format?: string, style?: any }
 
 /**
  * Represents a base text element.
@@ -21,7 +22,7 @@ export class TextComponent extends DisplayComponent<PIXI.Text, TextComponentData
      * Loads the text element.
      */
     public load(): void {
-        this._internalAssetData = new PIXI.Text(this._assetData.text);
+        this._internalAssetData = new PIXI.Text(this._assetData.text, this._assetData.style);
         this.container.addChild(this._internalAssetData);
     }
 
