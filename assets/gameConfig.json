@@ -3,17 +3,24 @@
         "assets/images/icon.png": "sprite",
         "assets/images/cat.png": "sprite"
     },
+    "renderer": {
+        "backgroundColor": "0xBDFFFF"
+    },
     "gameData": {
-        "buyables": [
+        "businesses": [
             {
+                "name": "Flowers",
                 "image": "icon.png",
-                "displayName": "Flowers",
-                "basePrice": 10
+                "baseCost": 10,
+                "baseProfit": 5,
+                "baseCycleDuration": 1
             },
             {
+                "name": "Cats",
                 "image": "cat.png",
-                "displayName": "Cats",
-                "basePrice": 25
+                "baseCost": 25,
+                "baseProfit": 15,
+                "baseCycleDuration": 5
             }
         ]
     }
