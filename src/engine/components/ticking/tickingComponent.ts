@@ -8,6 +8,11 @@ import { Actor } from "../../core/actor";
 export abstract class TickingComponent<T extends Actor = Actor> implements ITickable {
 
     /**
+     * The name of this ticking component.
+     */
+    public readonly name: string;
+
+    /**
      * The actor which this component acts upon.
      */
     public readonly actor: T;
@@ -19,9 +24,11 @@ export abstract class TickingComponent<T extends Actor = Actor> implements ITick
 
     /**
      * Contructs a new ticking component.
-     * @param theActor 
+     * @param name The name of this ticking component.
+     * @param theActor The actor which this ticking component operates on.
      */
-    public constructor(theActor: T) {
+    public constructor(name: string, theActor: T) {
+        this.name = name;
         this.actor = theActor;
         this.isActive = true;
     }

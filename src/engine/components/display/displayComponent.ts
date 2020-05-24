@@ -1,16 +1,23 @@
 import { Renderable } from "../../core/renderable";
 import { AssetLoader } from "../../core/assetLoader";
+import { Dictionary } from "../../core/types";
 
 /**
  * The data shape that gets passed into the display component constructor for configuration purposes.
  */
-type DisplayComponentData = { assetName?: string }
+type DisplayComponentData = { assetName: string }
+
 
 /**
  * The base class for display components which can be attached to a {@link Actor}.
  * Subclasses should override {@link DisplayComponent.load} to specify their load behavior.
  */
-export abstract class DisplayComponent<T extends PIXI.Container, U extends any = DisplayComponentData> extends Renderable {
+export abstract class DisplayComponent<T extends PIXI.Container = PIXI.Container, U extends Dictionary<any> = Partial<DisplayComponentData> & any> extends Renderable {
+
+    /**
+     * The name of this display component.
+     */
+    public readonly name: string;
 
     /**
      * The asset data associated with this asset.
@@ -24,10 +31,12 @@ export abstract class DisplayComponent<T extends PIXI.Container, U extends any =
 
     /**
      * Constructs a new display component using the provided asset data.
+     * @param name The name of this display component.
      * @param assetData The data describing this asset.
      */
-    public constructor(assetData: U) {
+    public constructor(name: string, assetData: U) {
         super();
+        this.name = name;
         this._assetData = assetData;
         this.load();
     }
@@ -37,8 +46,8 @@ export abstract class DisplayComponent<T extends PIXI.Container, U extends any =
      * assetName from the main asset loader, but subclasses should override as necessary.
      */
     public load(): void {
-        if (this._assetData.assetName !== undefined) {
-            this._internalAssetData = AssetLoader.getAsset<T>(this._assetData.assetName);
+        if ((this._assetData as unknown as DisplayComponentData).assetName !== undefined) {
+            this._internalAssetData = AssetLoader.getAsset<T>((this._assetData as unknown as DisplayComponentData).assetName);
             this.container.addChild(this._internalAssetData);
         }
     }

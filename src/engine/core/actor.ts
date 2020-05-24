@@ -1,6 +1,8 @@
 import { ITickable } from "../interfaces/ITickable";
 import { TickingComponent } from "../components/ticking/tickingComponent";
 import { Renderable } from "./renderable";
+import { Dictionary } from "./types";
+import { DisplayComponent } from "../components/display/displayComponent";
 
 /**
  * An actor which can be attached within a level's tree for drawing.
@@ -8,36 +10,41 @@ import { Renderable } from "./renderable";
 export class Actor extends Renderable implements ITickable {
 
     /**
+     * The name of this actor.
+     */
+    public readonly name: string;
+
+    /**
      * Whether or not this actor is currently active and should receive updates.
      */
     public isActive: boolean = true;
 
     /**
-     * The children of this actor.
-     * Children will be recursively updated and rendered in order by index.
+     * The children of this actor. Children will be recursively updated and rendered in the order they were added.
      */
-    public readonly children: Actor[];
+    public readonly children: Dictionary<Actor>;
 
     /**
      * The ticking components which operate on this actor's display components.
      */
-    public readonly tickingComponents: TickingComponent[];
+    public readonly tickingComponents: Dictionary<TickingComponent>;
 
     /**
      * The display components representing the visual state of this object.
-     * These perform no update routines and should be controlled by ticking components.
      */
-    public readonly displayComponents: Renderable[];
+    public readonly displayComponents: Dictionary<Renderable>;
 
     /**
      * Instantiates a new actor with no children or components attached.
+     * @param name The name of this actor.
      */
-    public constructor() {
+    public constructor(name: string) {
         super();
 
-        this.children = [];
-        this.tickingComponents = [];
-        this.displayComponents = [];
+        this.name = name;
+        this.children = {};
+        this.tickingComponents = {};
+        this.displayComponents = {};
     }
 
     /**
@@ -47,12 +54,11 @@ export class Actor extends Renderable implements ITickable {
      *  that the component is already attached to this actor.
      */
     public addTickingComponent(theComponent: TickingComponent): boolean {
-        const componentIndex = this.tickingComponents.indexOf(theComponent);
-        if (componentIndex >= 0) {
+        if (this.tickingComponents[theComponent.name] !== undefined) {
             return false;
         }
 
-        this.tickingComponents.push(theComponent);
+        this.tickingComponents[theComponent.name] = theComponent;
         return true;
     }
 
@@ -63,12 +69,11 @@ export class Actor extends Renderable implements ITickable {
      *  that the component was not attached to this actor.
      */
     public removeTickingComponent(theComponent: TickingComponent): boolean {
-        const componentIndex = this.tickingComponents.indexOf(theComponent);
-        if (componentIndex >= 0) {
+        if (this.tickingComponents[theComponent.name] === undefined) {
             return false;
         }
 
-        this.tickingComponents.splice(componentIndex, 1);
+        delete this.tickingComponents[theComponent.name];
         return true;
     }
 
@@ -78,14 +83,13 @@ export class Actor extends Renderable implements ITickable {
      * @returns True if the component was added successfully. Failure to add generally indicates
      *  that the component is already attached to this actor.
      */
-    public addDisplayComponent(theComponent: Renderable): boolean {
-        const componentIndex = this.displayComponents.indexOf(theComponent);
-        if (componentIndex >= 0) {
+    public addDisplayComponent(theComponent: DisplayComponent): boolean {
+        if (this.displayComponents[theComponent.name] !== undefined) {
             return false;
         }
 
-        this.displayComponents.push(theComponent);
         this.container.addChild(theComponent.container);
+        this.displayComponents[theComponent.name] = theComponent;
         return true;
     }
 
@@ -95,13 +99,13 @@ export class Actor extends Renderable implements ITickable {
      * @returns True if the component was removed successfully. Failure to remove generally indicates
      *  that the component was not attached to this actor.
      */
-    public removeDisplayComponent(theComponent: Renderable): boolean {
-        const componentIndex = this.displayComponents.indexOf(theComponent);
-        if (componentIndex >= 0) {
+    public removeDisplayComponent(theComponent: DisplayComponent): boolean {
+        if (this.displayComponents[theComponent.name] === undefined) {
             return false;
         }
 
-        this.displayComponents.splice(componentIndex, 1);
+        this.container.removeChild(theComponent.container);
+        delete this.displayComponents[theComponent.name];
         return true;
     }
 
@@ -112,13 +116,12 @@ export class Actor extends Renderable implements ITickable {
      *  that the child is already attached to this actor.
      */
     public addChild(theChild: Actor): boolean {
-        const childIndex = this.children.indexOf(theChild);
-        if (childIndex >= 0) {
+        if (this.children[theChild.name] !== undefined) {
             return false;
         }
 
-        this.children.push(theChild);
         this.container.addChild(theChild.container);
+        this.children[theChild.name] = theChild;
         return true;
     }
 
@@ -129,13 +132,12 @@ export class Actor extends Renderable implements ITickable {
      *  that the child was not attached to this actor.
      */
     public removeChild(theChild: Actor): boolean {
-        const childIndex = this.children.indexOf(theChild);
-        if (childIndex >= 0) {
+        if (this.children[theChild.name] === undefined) {
             return false;
         }
 
-        this.children.splice(childIndex, 1);
         this.container.removeChild(theChild.container);
+        delete this.children[theChild.name];
         return true;
     }
 
@@ -144,15 +146,19 @@ export class Actor extends Renderable implements ITickable {
      * @param deltaTime The amount of time that has passed in seconds since the last update tick.
      */
     public update(deltaTime: number): void {
-        for (const tickingComponent of this.tickingComponents) {
-            if (!tickingComponent.isActive) {
+        let component, child;
+
+        for (const componentName of Object.keys(this.tickingComponents)) {
+            component = this.tickingComponents[componentName];
+            if (!component.isActive) {
                 continue;
             }
 
-            tickingComponent.update(deltaTime);
+            component.update(deltaTime);
         }
 
-        for (const child of this.children) {
+        for (const childName of Object.keys(this.children)) {
+            child = this.children[childName];
             if (!child.isActive) {
                 continue;
             }
