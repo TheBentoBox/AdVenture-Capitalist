@@ -16,11 +16,19 @@ export class Observable<T> {
     private _onValueChanged: Signal;
 
     /**
+     * Indicates whether the value of this observable is numeric. If false, .adjust()
+     * calls on the observable will throw an error.
+     */
+    public readonly isNumeric: boolean;
+
+    /**
      * Constructs an observable with the given initial value.
      * @param initialValue The initial value to set the observable to.
      */
     public constructor(initialValue?: T) {
         this._onValueChanged = new Signal();
+        this.isNumeric = (typeof initialValue === "number");
+
         if (initialValue !== undefined) {
             this.setValue(initialValue);
         }
@@ -34,7 +42,7 @@ export class Observable<T> {
     }
 
     /**
-     * Sets the new internal value, informing observers of the value changed.
+     * Sets the value of this observable, informing subscribers of the value changed.
      * @param newValue The new value of this observable.
      */
     public setValue(newValue: T): void {
@@ -42,10 +50,20 @@ export class Observable<T> {
         this._onValueChanged.emit(this._value);
     }
 
+    /**
+     * Adjusts this observable's value. This will error if the observable's value isn't numeric.
+     * @param amount The amount to add to the observable's value.
+     */
+    public adjust(amount: number): void {
+        if (!this.isNumeric) {
+            throw new Error("Tried to add to a non-numeric observable.");
+        }
+        this.setValue((Number(this._value) + amount) as unknown as T);
+    }
 
     /**
-     * Wrapper for subscribing to the observable so that subscribers can immediately be notified
-     * of the current value of the observable.
+     * Subscribes to changes to this observable's value. The callback will immediately be called once
+     * with the current value of the observable.
      * @param listener The object that will be listening to this observable.
      * @param callback The callback to call when the observed value changes.
      */
@@ -55,8 +73,8 @@ export class Observable<T> {
     }
 
     /**
-     * Wrapper for unsubscribing to the private observable.
-     * @param listener The object that will be listening to this observable.
+     * Unsubscribes the object from changes to this observable's value.
+     * @param listener The object that should stop listening to this observable.
      */
     public unsubscribe(listener: any): void {
         this._onValueChanged.unsubscribe(listener);
