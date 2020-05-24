@@ -1,14 +1,26 @@
 import { Game } from "../engine/core/game";
 import { Level } from "../engine/core/level";
 import { VentureBusiness } from "./gameActors/ventureBusiness";
-import { TextComponent } from "../engine/components/display/textComponent";
+import { VentureBank } from "./gameActors/ventureBank/ventureBank";
+
+/**
+ * For internal use within the game class.
+ * The names of the main game actors which the game creates on start.
+ */
+enum MainGameActors {
+    BANK = "mainBank"
+}
 
 /**
  * A recreation of the popular AdVenture Capitalist web game.
+ * This game class follows the singleton pattern.
  */
 export class AdVentureCapitalist extends Game {
 
-    private _balance: number;
+    /**
+     * Gets the main instance of this game.
+     */
+    private static _instance: AdVentureCapitalist;
 
     /**
      * The game area level where buyable objects are displayed.
@@ -16,33 +28,49 @@ export class AdVentureCapitalist extends Game {
     private _gameArea!: Level;
 
     /**
-     * The currency formatted which the game will used to display currencies.
-     */
-    public static currencyFormatter: Intl.NumberFormat = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
-
-    /**
      * Creates a new AdVenture Capitalist game.
      * @param gameData The data loaded from the game config associated with this game.
      */
     public constructor(gameData: any) {
+        if (AdVentureCapitalist._instance !== undefined) {
+            throw new Error("Attempted to create an instance of the game class when one already was made")
+        }
+
         super(gameData);
-        this._balance = 0;
         this.createGameArea();
+
+        AdVentureCapitalist._instance = this;
+    }
+
+    /**
+     * Gets the running game instance.
+     */
+    public static get instance(): AdVentureCapitalist {
+        return AdVentureCapitalist._instance;
+    }
+
+    /**
+     * Gets the game bank from within the game level.
+     */
+    public get bank(): VentureBank {
+        return this._gameArea.root.children[MainGameActors.BANK] as VentureBank;
     }
 
     /**
      * Performs update routines on the game.
      * @param deltaTime The time in seconds since the last update tick.
      */
-    public update(deltaTime: number): void {
-    }
+    public update(deltaTime: number): void { }
 
     /**
      * Creates the main game area where the buyable objects are displayed.
      */
     private createGameArea(): void {
         this._gameArea = new Level("GameArea", true);
-        this._gameArea.root.addDisplayComponent(new TextComponent("currentBalance", { text: "$0.00", style: { fontSize: "24pt" } }))
+
+        // Create the bank that will manage the balance.
+        const bank = new VentureBank("mainBank");
+        this._gameArea.root.addChild(bank);
 
         // Create the business objects for each configured business.
         for (let i = 0; i < this._gameData.businesses.length; ++i) {
@@ -53,15 +81,8 @@ export class AdVentureCapitalist extends Game {
             businessInstance.transform.position.x = 100;
             businessInstance.transform.position.y = 100 + (i * 130);
 
-            businessInstance.onCycleComplete.subscribe(this, this.onBusinessCycleComplete.bind(this));
-
             // Add it to the game area level.
             this._gameArea.root.addChild(businessInstance);
         }
-    }
-
-    private onBusinessCycleComplete(business: VentureBusiness): void {
-        this._balance += (business.baseProfit * business.amountOwned.getValue());
-        (this._gameArea.root.displayComponents["currentBalance"] as TextComponent).setText(AdVentureCapitalist.currencyFormatter.format(this._balance));
     }
 }
