@@ -2,7 +2,7 @@ import { Actor } from "../../engine/core/actor";
 import { TextComponent } from "../../engine/components/display/textComponent";
 import { SpriteComponent } from "../../engine/components/display/spriteComponent";
 import { Observable } from "../../engine/core/observable";
-import { BusinessTicker } from "../gameComponents/businessTicker";
+import { BusinessController } from "../gameComponents/businessTicker";
 import { Signal } from "../../engine/core/signal";
 
 enum BusinessActorComponents {
@@ -77,7 +77,7 @@ export class VentureBusiness extends Actor {
         this.baseProfit = baseProfit;
         this.baseCycleDuration = baseCycleDuration;
 
-        this.addTickingComponent(new BusinessTicker(this.name + "Ticker", this));
+        this.addControllerComponent(new BusinessController(this.name + "Controller", this));
     }
 
     /**

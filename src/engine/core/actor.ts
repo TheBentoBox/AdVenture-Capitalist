@@ -1,5 +1,5 @@
 import { ITickable } from "../interfaces/ITickable";
-import { TickingComponent } from "../components/ticking/tickingComponent";
+import { ControllerComponent } from "../components/controller/controllerComponent";
 import { Renderable } from "./renderable";
 import { Dictionary } from "./types";
 import { DisplayComponent } from "../components/display/displayComponent";
@@ -25,9 +25,9 @@ export class Actor extends Renderable implements ITickable {
     public readonly children: Dictionary<Actor>;
 
     /**
-     * The ticking components which operate on this actor's display components.
+     * The controller components which operate on this actor's display components.
      */
-    public readonly tickingComponents: Dictionary<TickingComponent>;
+    public readonly controllerComponents: Dictionary<ControllerComponent>;
 
     /**
      * The display components representing the visual state of this object.
@@ -43,37 +43,37 @@ export class Actor extends Renderable implements ITickable {
 
         this.name = name;
         this.children = {};
-        this.tickingComponents = {};
+        this.controllerComponents = {};
         this.displayComponents = {};
     }
 
     /**
-     * Adds a new ticking component to this actor.
+     * Adds a new controller component to this actor.
      * @param theComponent The component to be added.
      * @returns True if the component was added successfully. Failure to add generally indicates
      *  that the component is already attached to this actor.
      */
-    public addTickingComponent(theComponent: TickingComponent): boolean {
-        if (this.tickingComponents[theComponent.name] !== undefined) {
+    public addControllerComponent(theComponent: ControllerComponent): boolean {
+        if (this.controllerComponents[theComponent.name] !== undefined) {
             return false;
         }
 
-        this.tickingComponents[theComponent.name] = theComponent;
+        this.controllerComponents[theComponent.name] = theComponent;
         return true;
     }
 
     /**
-     * Removes a ticking component from this actor.
+     * Removes a controller component from this actor.
      * @param theComponent The component to be removed.
      * @returns True if the component was removed successfully. Failure to remove generally indicates
      *  that the component was not attached to this actor.
      */
-    public removeTickingComponent(theComponent: TickingComponent): boolean {
-        if (this.tickingComponents[theComponent.name] === undefined) {
+    public removeControllerComponent(theComponent: ControllerComponent): boolean {
+        if (this.controllerComponents[theComponent.name] === undefined) {
             return false;
         }
 
-        delete this.tickingComponents[theComponent.name];
+        delete this.controllerComponents[theComponent.name];
         return true;
     }
 
@@ -142,14 +142,14 @@ export class Actor extends Renderable implements ITickable {
     }
 
     /**
-     * Updates all ticking components and children attached to this actor.
+     * Updates all controller components and children attached to this actor.
      * @param deltaTime The amount of time that has passed in seconds since the last update tick.
      */
     public update(deltaTime: number): void {
         let component, child;
 
-        for (const componentName of Object.keys(this.tickingComponents)) {
-            component = this.tickingComponents[componentName];
+        for (const componentName of Object.keys(this.controllerComponents)) {
+            component = this.controllerComponents[componentName];
             if (!component.isActive) {
                 continue;
             }

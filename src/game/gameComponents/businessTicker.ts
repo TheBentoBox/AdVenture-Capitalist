@@ -1,4 +1,4 @@
-import { TickingComponent } from "../../engine/components/ticking/tickingComponent";
+import { ControllerComponent } from "../../engine/components/controller/controllerComponent";
 import { VentureBusiness } from "../gameActors/ventureBusiness";
 import { TextComponent } from "../../engine/components/display/textComponent";
 import { formatTime } from "../utilities";
@@ -6,11 +6,11 @@ import { formatTime } from "../utilities";
 /**
  * Controls running a singular business.
  */
-export class BusinessTicker extends TickingComponent<VentureBusiness> {
+export class BusinessController extends ControllerComponent<VentureBusiness> {
 
     /**
      * Whether or not this business has a "manager" associated with it.
-     * If so, ticking will automatically begin again when a cycle completes.
+     * If so, a new business cycle will automatically begin again when a cycle completes.
      */
     public hasManager: boolean = false;
 
