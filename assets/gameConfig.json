@@ -10,14 +10,15 @@
         "businesses": [
             {
                 "name": "Flowers",
-                "image": "icon.png",
+                "icon": "icon.png",
+                "initialAmountOwned": 1,
                 "baseCost": 10,
                 "baseProfit": 5,
                 "baseCycleDuration": 1
             },
             {
                 "name": "Cats",
-                "image": "cat.png",
+                "icon": "cat.png",
                 "baseCost": 25,
                 "baseProfit": 15,
                 "baseCycleDuration": 5

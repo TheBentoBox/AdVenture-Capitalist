@@ -59,6 +59,6 @@ export class VentureBank extends Actor {
      */
     public adjustBalance(amount: number): void {
         this._balance.adjust(amount);
-        GameEvent.BALANCE_ADJUSTED.emit(amount, this._balance);
+        GameEvent.BALANCE_ADJUSTED.emit(amount);
     }
 }

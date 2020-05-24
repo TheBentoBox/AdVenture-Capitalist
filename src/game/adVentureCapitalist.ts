@@ -77,7 +77,7 @@ export class AdVentureCapitalist extends Game {
             const business = this._gameData.businesses[i];
 
             // Create the actor which will represent this buyable object.
-            const businessInstance = new VentureBusiness(business.name, business.image, business.baseCost, business.baseProfit, business.baseCycleDuration);
+            const businessInstance = new VentureBusiness(business.name, business);
             businessInstance.transform.position.x = 100;
             businessInstance.transform.position.y = 100 + (i * 130);
 

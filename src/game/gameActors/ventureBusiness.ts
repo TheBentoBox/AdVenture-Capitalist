@@ -28,6 +28,38 @@ enum VentureBusinessComponents {
 }
 
 /**
+ * The shape of the data that should be passed into the business on creation.
+ * This is drawn from the game config.
+ */
+type VentureBusinessData = {
+
+    /**
+     * The asset to use as this business's main display icon.
+     */
+    icon: string,
+
+    /**
+     * The base cost of the business.The cost increases formulaically as more are purchased.
+     */
+    baseCost: number,
+
+    /**
+     * The base profit of this business.The profit increases as more units of the business are purchased.
+     */
+    baseProfit: number,
+
+    /**
+     * The duration one business cycle should take in seconds.
+     */
+    baseCycleDuration: number,
+
+    /**
+     * The number of units of this business that should be owned by default for a fresh game.
+     */
+    initialAmountOwned: number,
+}
+
+/**
  * Represents one of the buyable businesses in the {@link AdVentureCapitalist} game.
  */
 export class VentureBusiness extends Actor {
@@ -67,19 +99,16 @@ export class VentureBusiness extends Actor {
     /**
      * Constructs a new business.
      * @param name The name of this business actor.
-     * @param assetName The asset to use as this business's main display icon.
-     * @param baseCost The base cost of the business. The cost increases formulaically as more are purchased.
-     * @param baseProfit The base profit of this business. The profit increases as more units of the business are purchased.
-     * @param baseCycleDuration The duration one business cycle should take in seconds.
+     * @param businessData The configured data defining this business.
      */
-    public constructor(name: string, assetName: string, baseCost: number, baseProfit: number, baseCycleDuration: number) {
+    public constructor(name: string, businessData: VentureBusinessData) {
         super(name);
         this.profitMultipler = 1;
-        this.amountOwned = new Observable<number>(1);
+        this.amountOwned = new Observable<number>(businessData.initialAmountOwned ?? 0);
         this.timeInCycle = new Observable<number>(0);
 
         // Attach the main display components.
-        this.addDisplayComponent(new SpriteComponent(VentureBusinessComponents.ICON, { assetName }));
+        this.addDisplayComponent(new SpriteComponent(VentureBusinessComponents.ICON, { assetName: businessData.icon }));
         this.addDisplayComponent(new TextComponent(VentureBusinessComponents.AMOUNT_OWNED, { text: this.amountOwned }));
         this.addDisplayComponent(new TextComponent(VentureBusinessComponents.TIMER, { text: "" }));
 
@@ -91,9 +120,9 @@ export class VentureBusiness extends Actor {
         this.timerTextComponent.transform.position.x = this.iconComponent.container.width + 15;
         this.timerTextComponent.transform.position.y = ((this.iconComponent.container.height / 2) - (this.timerTextComponent.container.height / 2));
 
-        this.baseCost = baseCost;
-        this.baseProfit = baseProfit;
-        this.baseCycleDuration = baseCycleDuration;
+        this.baseCost = businessData.baseCost;
+        this.baseProfit = businessData.baseProfit;
+        this.baseCycleDuration = businessData.baseCycleDuration;
 
         this.addControllerComponent(new BusinessController(this.name + "Controller", this));
     }
@@ -123,6 +152,7 @@ export class VentureBusiness extends Actor {
      * Gets the profit of this business based on the number of owned units.
      */
     public get profit(): number {
-        return (this.baseProfit * this.amountOwned.getValue() * this.profitMultipler * AdVentureCapitalist.instance.bank.globalProfitMultiplier);
+        const profit = (this.baseProfit * this.amountOwned.getValue() * this.profitMultipler * AdVentureCapitalist.instance.bank.globalProfitMultiplier);
+        return profit;
     }
 }

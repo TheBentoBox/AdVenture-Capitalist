@@ -67,7 +67,7 @@ export class Signal<T = Function> implements IDestroyable {
      * Calls all callbacks subscribed to this signal with the passed value as the argument.
      * @param value The value to pass to the callbacks.
      */
-    public emit(...value: any): void {
+    public emit(value?: any): void {
         if (this._listenerEntries === undefined) {
             return;
         }

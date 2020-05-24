@@ -85,7 +85,7 @@ export class TextComponent extends DisplayComponent<PIXI.Text, TextComponentData
     public attachTo(observable: Observable<number> | Observable<string>): void {
         this.detatch();
 
-        observable.subscribe(this, (newValue: number | string) => this.setText(String(newValue)));
+        observable.subscribe(this, this.setText.bind(this));
         this._attachedObservable = observable;
     }
 

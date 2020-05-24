@@ -56,6 +56,8 @@ export class BusinessController extends ControllerComponent<VentureBusiness> {
      * This ensures that the ticker is running if the user interacted with the business.
      */
     private onBusinessClicked(): void {
-        this.isActive = true;
+        if (this.actor.amountOwned.getValue() > 0) {
+            this.isActive = true;
+        }
     }
 }

@@ -14,7 +14,7 @@ export class GameEvent {
 
     /**
      * Emitted from whenever the main bank's balance is adjusted.
-     * The emitted values are the amount the balance was adjusted by and the resulting new balance.
+     * The emitted value is the amount the balance was adjusted by.
      */
-    public static readonly BALANCE_ADJUSTED = new Signal<(amount: number, newBalance: number) => void>();
+    public static readonly BALANCE_ADJUSTED = new Signal<(amount: number) => void>();
 }
