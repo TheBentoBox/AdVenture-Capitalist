@@ -140,7 +140,7 @@ export class Actor extends Renderable implements ITickable {
     }
 
     /**
-     * Updates all ticking components attached to this actor.
+     * Updates all ticking components and children attached to this actor.
      * @param deltaTime The amount of time that has passed in seconds since the last update tick.
      */
     public update(deltaTime: number): void {
@@ -150,6 +150,14 @@ export class Actor extends Renderable implements ITickable {
             }
 
             tickingComponent.update(deltaTime);
+        }
+
+        for (const child of this.children) {
+            if (!child.isActive) {
+                continue;
+            }
+
+            child.update(deltaTime);
         }
     }
 }

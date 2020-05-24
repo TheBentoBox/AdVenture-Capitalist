@@ -108,7 +108,7 @@ export class Engine {
      * The main tick loop, updating all registered tickers and requesting the next tick from the browser.
      */
     private static tick(): void {
-        const deltaTime = (Date.now() - Engine._lastUpdateTime) / 60;
+        const deltaTime = (Date.now() - Engine._lastUpdateTime) / 1000;
 
         Engine._game.update(deltaTime);
         Engine._renderer.update(deltaTime);
