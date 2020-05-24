@@ -2,13 +2,29 @@ import { Actor } from "../../engine/core/actor";
 import { TextComponent } from "../../engine/components/display/textComponent";
 import { SpriteComponent } from "../../engine/components/display/spriteComponent";
 import { Observable } from "../../engine/core/observable";
-import { BusinessController } from "../gameComponents/businessTicker";
-import { Signal } from "../../engine/core/signal";
+import { BusinessController } from "../gameComponents/businessController";
+import { AdVentureCapitalist } from "../adVentureCapitalist";
 
-enum BusinessActorComponents {
+/**
+ * For internal use within the game class.
+ * The names of the main display components representing the view of this business.
+ */
+enum VentureBusinessComponents {
+
+    /**
+     * The icon used to represent this business.
+     */
     ICON = "icon",
-    TIMER = "timer",
-    AMOUNT_OWNED = "amountOwned",
+
+    /**
+     * The text component displaying the time remaining in the current business cycle.
+     */
+    TIMER = "timerText",
+
+    /**
+     * The text component displaying the number of units of this business that have been purchased.
+     */
+    AMOUNT_OWNED = "amountOwnedText",
 }
 
 /**
@@ -34,6 +50,11 @@ export class VentureBusiness extends Actor {
     public readonly baseCycleDuration: number;
 
     /**
+     * The profit multiplier applied to this business.
+     */
+    public profitMultipler: number;
+
+    /**
      * The amount of time the current cycle has been running for, in seconds.
      */
     public timeInCycle: Observable<number>;
@@ -42,11 +63,6 @@ export class VentureBusiness extends Actor {
      * The number of instances of this business owned.
      */
     public amountOwned: Observable<number>;
-
-    /**
-     * Signal to notify that this business has completed a full cycle.
-     */
-    public onCycleComplete: Signal<(business: VentureBusiness) => void>;
 
     /**
      * Constructs a new business.
@@ -58,20 +74,22 @@ export class VentureBusiness extends Actor {
      */
     public constructor(name: string, assetName: string, baseCost: number, baseProfit: number, baseCycleDuration: number) {
         super(name);
+        this.profitMultipler = 1;
+        this.amountOwned = new Observable<number>(1);
+        this.timeInCycle = new Observable<number>(0);
 
         // Attach the main display components.
-        this.addDisplayComponent(new SpriteComponent(BusinessActorComponents.ICON, { assetName }));
-        this.addDisplayComponent(new TextComponent(BusinessActorComponents.AMOUNT_OWNED, { text: "0" }));
-        this.addDisplayComponent(new TextComponent(BusinessActorComponents.TIMER, { text: "" }));
+        this.addDisplayComponent(new SpriteComponent(VentureBusinessComponents.ICON, { assetName }));
+        this.addDisplayComponent(new TextComponent(VentureBusinessComponents.AMOUNT_OWNED, { text: this.amountOwned }));
+        this.addDisplayComponent(new TextComponent(VentureBusinessComponents.TIMER, { text: "" }));
 
-        // Hook up the value changer of the amount owned to update the associated text element.
-        this.amountOwned = new Observable<number>(1);
-        this.amountOwnedTextComponent.attachTo(this.amountOwned);
-        this.amountOwnedTextComponent.transform.position.y = this.iconComponent.container.height;
+        // Align the business amount owned with the bottom-middle of its icon.
+        this.amountOwnedTextComponent.transform.position.x = ((this.iconComponent.container.width / 2) - (this.timerTextComponent.container.width / 2));
+        this.amountOwnedTextComponent.transform.position.y = (this.iconComponent.container.height + 5);
 
-        this.timerTextComponent.transform.position.x = this.iconComponent.container.width;
-        this.timeInCycle = new Observable<number>(0);
-        this.onCycleComplete = new Signal<(business: VentureBusiness) => {}>();
+        // Align the business timer to the right-middle of its icon.
+        this.timerTextComponent.transform.position.x = this.iconComponent.container.width + 15;
+        this.timerTextComponent.transform.position.y = ((this.iconComponent.container.height / 2) - (this.timerTextComponent.container.height / 2));
 
         this.baseCost = baseCost;
         this.baseProfit = baseProfit;
@@ -84,20 +102,27 @@ export class VentureBusiness extends Actor {
      * Returns the sprite component displaying this business's configured icon.
      */
     public get iconComponent(): SpriteComponent {
-        return this.displayComponents[BusinessActorComponents.ICON] as SpriteComponent;
+        return this.displayComponents[VentureBusinessComponents.ICON] as SpriteComponent;
     }
 
     /**
      * Returns the text component displaying the amount of this business that have been purchased.
      */
     public get amountOwnedTextComponent(): TextComponent {
-        return this.displayComponents[BusinessActorComponents.AMOUNT_OWNED] as TextComponent;
+        return this.displayComponents[VentureBusinessComponents.AMOUNT_OWNED] as TextComponent;
     }
 
     /**
      * Returns the text component displaying the timer before this business's next cycle completes.
      */
     public get timerTextComponent(): TextComponent {
-        return this.displayComponents[BusinessActorComponents.TIMER] as TextComponent;
+        return this.displayComponents[VentureBusinessComponents.TIMER] as TextComponent;
+    }
+
+    /**
+     * Gets the profit of this business based on the number of owned units.
+     */
+    public get profit(): number {
+        return (this.baseProfit * this.amountOwned.getValue() * this.profitMultipler * AdVentureCapitalist.instance.bank.globalProfitMultiplier);
     }
 }

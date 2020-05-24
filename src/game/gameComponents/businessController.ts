@@ -1,7 +1,7 @@
 import { ControllerComponent } from "../../engine/components/controller/controllerComponent";
 import { VentureBusiness } from "../gameActors/ventureBusiness";
-import { TextComponent } from "../../engine/components/display/textComponent";
 import { formatTime } from "../utilities";
+import { GameEvent } from "../gameEvents";
 
 /**
  * Controls running a singular business.
@@ -41,8 +41,7 @@ export class BusinessController extends ControllerComponent<VentureBusiness> {
             return;
         }
 
-        console.log("Business completed a cycle:", this.actor);
-        this.actor.onCycleComplete.emit(this.actor);
+        GameEvent.CYCLE_COMPLETE.emit(this.actor);
         this.actor.timeInCycle.setValue(0);
 
         // If there is no manager associated with this ticker, it should automatically
