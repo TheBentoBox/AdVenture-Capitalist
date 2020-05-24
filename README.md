@@ -13,3 +13,10 @@ These combine to produce an MVC-esque structure to the engine. Actors are your "
 ### Other bits:
 * **Signals**: These are basic subscribable objects which can have values emitted from them with `signal.emit(...values)`. These are primarily useful for event/notification systems.
 * **Observable**: These are essentially a field wrapped by a signal. Observables have their value set and retrieved via `observable.setValue(value)` and `observable.getValue()`, respectively. Then, just like with signals, you can `subscribe()` and `unsubscribe()` from an observable, which means you'll be notified when its value changes.
+
+## To Do
+* Allow `Renderable` to have alignment options to automatically align to the sides of another `Renderable`.
+  * This will require wrapping accessors to the `container`'s width and height with `Observables` so that the renderables can watch for changes to their anchor's size as well as its transform.
+* Add abstract `Game.saveGame()` and `Game.loadGame()`, and maybe a local storage helper function handler.
+* Make actors use the same data structure via generics as display components use.
+* Some better UI support. Maybe a `UIActor` which subclasses `Actor` but with better interaction event utilities via public signals on interact.

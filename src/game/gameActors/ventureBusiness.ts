@@ -152,7 +152,6 @@ export class VentureBusiness extends Actor {
      * Gets the profit of this business based on the number of owned units.
      */
     public get profit(): number {
-        const profit = (this.baseProfit * this.amountOwned.getValue() * this.profitMultipler * AdVentureCapitalist.instance.bank.globalProfitMultiplier);
-        return profit;
+        return (this.baseProfit * this.amountOwned.getValue() * this.profitMultipler * AdVentureCapitalist.instance.bank.globalProfitMultiplier);
     }
 }
