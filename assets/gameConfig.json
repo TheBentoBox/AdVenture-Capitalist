@@ -7,10 +7,12 @@
         "buyables": [
             {
                 "image": "icon.png",
+                "displayName": "Flowers",
                 "basePrice": 10
             },
             {
                 "image": "cat.png",
+                "displayName": "Cats",
                 "basePrice": 25
             }
         ]

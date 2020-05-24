@@ -54,6 +54,7 @@ export class AssetLoader {
             const assetData = loadedResources[assetKey];
             const fileName = AssetLoader.getFileName(assetData.url);
 
+            // Parse the asset based on its configured asset type.
             switch (AssetLoader._assetMap[assetData.url]) {
                 case AssetType.SPRITE:
                     AssetLoader._assetStore[fileName] = new PIXI.Sprite(assetData.texture);
