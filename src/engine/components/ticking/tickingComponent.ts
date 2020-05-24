@@ -5,12 +5,12 @@ import { Actor } from "../../core/actor";
  * Represents a component which can be attached to an actor to perform operations against it or its display components.
  * They hold a reference to their owning actor and effectively control the behavior of that actor.
  */
-export abstract class TickingComponent implements ITickable {
+export abstract class TickingComponent<T extends Actor> implements ITickable {
 
     /**
      * The actor which this component acts upon.
      */
-    public readonly actor: Actor;
+    public readonly actor: T;
 
     /**
      * Whether or not this ticking component is active, allowing it to tick.
@@ -21,7 +21,7 @@ export abstract class TickingComponent implements ITickable {
      * Contructs a new ticking component.
      * @param theActor 
      */
-    public constructor(theActor: Actor) {
+    public constructor(theActor: T) {
         this.actor = theActor;
         this.isActive = true;
     }
