@@ -1,15 +1,27 @@
 import { DisplayComponent } from "./displayComponent";
+import { Observable } from "../../core/observable";
+
+/**
+ * The data shape that gets passed into the display component constructor for configuration purposes.
+ */
+type TextComponentData = { text: string }
 
 /**
  * Represents a base text element.
  */
-export class TextComponent extends DisplayComponent<PIXI.Text> {
+export class TextComponent extends DisplayComponent<PIXI.Text, TextComponentData> {
+
+    /**
+     * The observable this text component is attached to. It will update its value automatically to match the
+     * observable's value whenever it changes.
+     */
+    private _attachedObservable?: Observable<number> | Observable<string>;
 
     /**
      * Loads the text element.
      */
     public load(): void {
-        this._internalAssetData = new PIXI.Text(this._assetName);
+        this._internalAssetData = new PIXI.Text(this._assetData.text);
         this.container.addChild(this._internalAssetData);
     }
 
@@ -19,5 +31,26 @@ export class TextComponent extends DisplayComponent<PIXI.Text> {
      */
     public setText(newText: string): void {
         this._internalAssetData.text = newText;
+    }
+
+    /**
+     * Attaches this text component to the given observable, causing it to live update to match the observable's value.
+     * @param observable The observable to attach to.
+     */
+    public attachTo(observable: Observable<number> | Observable<string>): void {
+        this.detatch();
+
+        observable.subscribe(this, (newValue: number | string) => this.setText(String(newValue)));
+        this._attachedObservable = observable;
+    }
+
+    /**
+     * Detaches this text from its current observable.
+     */
+    public detatch(): void {
+        if (this._attachedObservable !== undefined) {
+            this._attachedObservable.unsubscribe(this);
+            this._attachedObservable = undefined;
+        }
     }
 }

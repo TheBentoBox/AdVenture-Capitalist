@@ -2,15 +2,20 @@ import { Renderable } from "../../core/renderable";
 import { AssetLoader } from "../../core/assetLoader";
 
 /**
+ * The data shape that gets passed into the display component constructor for configuration purposes.
+ */
+type DisplayComponentData = { assetName?: string }
+
+/**
  * The base class for display components which can be attached to a {@link Actor}.
  * Subclasses should override {@link DisplayComponent.load} to specify their load behavior.
  */
-export abstract class DisplayComponent<T extends PIXI.Container> extends Renderable {
+export abstract class DisplayComponent<T extends PIXI.Container, U extends any = DisplayComponentData> extends Renderable {
 
     /**
-     * The name of the asset associated with this display component.
+     * The asset data associated with this asset.
      */
-    protected _assetName: string;
+    protected _assetData: U;
 
     /**
      * The asset data associated with this diplay component.
@@ -18,12 +23,12 @@ export abstract class DisplayComponent<T extends PIXI.Container> extends Rendera
     protected _internalAssetData!: T;
 
     /**
-     * Constructs a new sprite component which will display the specified asset.
-     * @param assetName The name of the sprite asset to be displayed.
+     * Constructs a new display component using the provided asset data.
+     * @param assetData The data describing this asset.
      */
-    public constructor(assetName: string) {
+    public constructor(assetData: U) {
         super();
-        this._assetName = assetName;
+        this._assetData = assetData;
         this.load();
     }
 
@@ -32,8 +37,10 @@ export abstract class DisplayComponent<T extends PIXI.Container> extends Rendera
      * assetName from the main asset loader, but subclasses should override as necessary.
      */
     public load(): void {
-        this._internalAssetData = AssetLoader.getAsset<T>(this._assetName);
-        this.container.addChild(this._internalAssetData);
+        if (this._assetData.assetName !== undefined) {
+            this._internalAssetData = AssetLoader.getAsset<T>(this._assetData.assetName);
+            this.container.addChild(this._internalAssetData);
+        }
     }
 
     /**
