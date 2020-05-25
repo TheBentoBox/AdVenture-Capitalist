@@ -41,7 +41,11 @@ export class AssetLoader {
      * @param assetKey The name of the asset to retrieve from the loaded asset store.
      */
     public static getAsset<T extends PIXI.Container>(assetKey: string): T {
-        return this._assetStore[AssetLoader.getFileName(assetKey)] as T;
+        let asset: T = this._assetStore[AssetLoader.getFileName(assetKey)] as T;
+        if (asset instanceof PIXI.Sprite) {
+            asset = (PIXI.Sprite.from(asset.texture) as unknown) as T;
+        }
+        return asset;
     }
 
     /**

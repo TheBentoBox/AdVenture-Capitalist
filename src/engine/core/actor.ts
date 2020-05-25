@@ -7,7 +7,12 @@ import { DisplayComponent } from "../components/display/displayComponent";
 /**
  * An actor which can be attached within a level's tree for drawing.
  */
-export class Actor extends Renderable implements ITickable {
+export class Actor<T extends Dictionary<any> = Partial<Dictionary<any>>> extends Renderable implements ITickable {
+
+    /**
+     * The data associated with this actor.
+     */
+    protected readonly _actorData: T;
 
     /**
      * The name of this actor.
@@ -37,11 +42,13 @@ export class Actor extends Renderable implements ITickable {
     /**
      * Instantiates a new actor with no children or components attached.
      * @param name The name of this actor.
+     * @param actorData The data this actor should be configured with.
      */
-    public constructor(name: string) {
+    public constructor(name: string, actorData: T = {} as T) {
         super();
-
         this.name = name;
+        this._actorData = actorData;
+
         this.children = {};
         this.controllerComponents = {};
         this.displayComponents = {};
