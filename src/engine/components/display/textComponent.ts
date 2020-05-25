@@ -1,10 +1,15 @@
-import { DisplayComponent } from "./displayComponent";
+import { DisplayComponent, DisplayComponentData } from "./displayComponent";
 import { Observable } from "../../core/observable";
+import { Signal } from "../../core/signal";
 
 /**
  * The data shape that gets passed into the display component constructor for configuration purposes.
  */
-type TextComponentData = { text: string | Observable<number> | Observable<string>, format?: TextFormatMode, style?: any }
+export interface TextComponentData extends DisplayComponentData {
+    text: string | Observable<number> | Observable<string>,
+    format?: TextFormatMode,
+    style?: Partial<PIXI.TextStyle>
+}
 
 /**
  * Represents the ways in which a text component's text can be formatted.
@@ -39,25 +44,38 @@ export class TextComponent extends DisplayComponent<PIXI.Text, TextComponentData
     public static currencyFormatter: Intl.NumberFormat = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
 
     /**
-     * Loads the text element.
+     * Emitted from when the text value of this component changes.
      */
-    public load(): void {
+    public onTextChanged: Signal = new Signal<(component?: TextComponent) => void>();
+
+    /**
+     * Constructs a new text component using the provided object data.
+     * @param objectData The data describing this object.
+     */
+    public constructor(objectData: TextComponentData) {
+        super(objectData);
 
         // Default the format mode to text.
-        if (this._assetData.format === undefined) {
-            this._assetData.format = TextFormatMode.TEXT;
+        if (this._objectData.format === undefined) {
+            this._objectData.format = TextFormatMode.TEXT;
         }
 
         // Default the starting text to an empty string if the text was set to watch an observable.
-        const isObservable = (this._assetData.text instanceof Observable);
-        let startingText: string = (isObservable ? "" : String(this._assetData.text));
-        this._internalAssetData = new PIXI.Text(startingText, this._assetData.style);
+        const isObservable = (this._objectData.text instanceof Observable);
+        let startingText: string = (isObservable ? "" : String(this._objectData.text));
+        this._internalAssetData = new PIXI.Text(startingText, this._objectData.style);
 
         // Attach to the configured observable if applicable.
         if (isObservable) {
-            this.attachTo(this._assetData.text as (Observable<string> | Observable<number>));
+            this.attachTo(this._objectData.text as (Observable<string> | Observable<number>));
         }
+    }
 
+    /**
+     * Loads the text element.
+     */
+    public load(): void {
+        super.load();
         this.container.addChild(this._internalAssetData);
     }
 
@@ -66,7 +84,7 @@ export class TextComponent extends DisplayComponent<PIXI.Text, TextComponentData
      * @param newText The new text value to display.
      */
     public setText(newText: string | number): void {
-        switch (this._assetData.format) {
+        switch (this._objectData.format) {
             case TextFormatMode.CURRENCY:
                 newText = TextComponent.currencyFormatter.format(Number(newText));
                 break;
@@ -76,6 +94,19 @@ export class TextComponent extends DisplayComponent<PIXI.Text, TextComponentData
         }
 
         this._internalAssetData.text = String(newText);
+
+        if (this.onTextChanged === undefined) {
+            this.onTextChanged = new Signal<(component?: TextComponent) => void>();
+        }
+        this.onTextChanged.emit(this);
+    }
+
+    /**
+     * Updates the text style for this component.
+     * @param newText The new text style settings to use.
+     */
+    public setStyle(newStyle: PIXI.TextStyle): void {
+        this._internalAssetData.style = newStyle;
     }
 
     /**

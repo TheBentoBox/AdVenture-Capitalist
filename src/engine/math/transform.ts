@@ -1,5 +1,12 @@
-import { Vector3 } from "./vector3";
+import { Vector3, VectorData } from "./vector3";
 import { IDestroyable } from "../interfaces/IDestroyable";
+import { IConfigurable } from "../interfaces/IConfigurable";
+
+export interface TransformData {
+    position?: VectorData,
+    scale?: VectorData,
+    rotation?: VectorData
+}
 
 /**
  * A transform representing an object's location in 3D space. This is primarily used as an adapter level
@@ -8,7 +15,7 @@ import { IDestroyable } from "../interfaces/IDestroyable";
  * The engine currently only renders in 2D but treating transforms as 3D is the most future-proof
  * approach and allows for rotations around the otherwise-unused z-axis.
  */
-export class Transform implements IDestroyable {
+export class Transform implements IDestroyable, IConfigurable<TransformData> {
 
     /**
      * The position of this transform.
@@ -44,5 +51,23 @@ export class Transform implements IDestroyable {
         this.position.destroy();
         this.scale.destroy();
         this.rotation.destroy();
+    }
+
+    /**
+     * Configures the transform from the given data.
+     * @param transformData The data to configure this transform from.
+     * @returns This transform after having its values updated.
+     */
+    public configure(transformData: TransformData): Transform {
+        if (transformData.position !== undefined) {
+            this.position.configure(transformData.position);
+        }
+        if (transformData.scale !== undefined) {
+            this.scale.configure(transformData.scale);
+        }
+        if (transformData.rotation !== undefined) {
+            this.rotation.configure(transformData.rotation);
+        }
+        return this;
     }
 }

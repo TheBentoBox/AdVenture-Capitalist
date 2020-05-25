@@ -1,17 +1,16 @@
-import { Renderable } from "../../core/renderable";
+import { Renderable, RenderableData } from "../../core/renderable";
 import { AssetLoader } from "../../core/assetLoader";
-import { Dictionary } from "../../core/types";
 
 /**
- * The data shape that gets passed into the display component constructor for configuration purposes.
+ * The data that can be passed into a renderable object upon creation.
  */
-type DisplayComponentData = { assetName: string }
+export interface DisplayComponentData extends RenderableData { assetName?: string };
 
 /**
  * The base class for display components which can be attached to a {@link Actor}.
  * Subclasses should override {@link DisplayComponent.load} to specify their load behavior.
  */
-export abstract class DisplayComponent<T extends PIXI.Container = PIXI.Container, U extends Dictionary<any> = Partial<DisplayComponentData> & any> extends Renderable {
+export abstract class DisplayComponent<T extends PIXI.Container = PIXI.Container, U extends DisplayComponentData = DisplayComponentData> extends Renderable<U> {
 
     /**
      * The name of this display component.
@@ -19,25 +18,25 @@ export abstract class DisplayComponent<T extends PIXI.Container = PIXI.Container
     public readonly name: string;
 
     /**
-     * The asset data associated with this asset.
-     */
-    protected _assetData: U;
-
-    /**
      * The asset data associated with this diplay component.
      */
     protected _internalAssetData!: T;
 
     /**
-     * Constructs a new display component using the provided asset data.
-     * @param name The name of this display component.
-     * @param assetData The data describing this asset.
+     * Constructs a new display component using the provided object data.
+     * @param objectData The data describing this object.
      */
-    public constructor(name: string, assetData: U) {
-        super();
-        this.name = name;
-        this._assetData = assetData;
-        this.load();
+    public constructor(objectData: U) {
+        super(objectData);
+        this.name = objectData.name;
+    }
+
+    /**
+     * Unloads resources held by this renderable.
+     */
+    public destroy(): void {
+        super.destroy();
+        delete this._internalAssetData;
     }
 
     /**
@@ -45,10 +44,28 @@ export abstract class DisplayComponent<T extends PIXI.Container = PIXI.Container
      * assetName from the main asset loader, but subclasses should override as necessary.
      */
     public load(): void {
-        if ((this._assetData as unknown as DisplayComponentData).assetName !== undefined) {
-            this._internalAssetData = AssetLoader.getAsset<T>((this._assetData as unknown as DisplayComponentData).assetName);
+        super.load();
+        if (this._objectData.assetName !== undefined) {
+            this._internalAssetData = AssetLoader.getAsset<T>(this._objectData.assetName);
             this.container.addChild(this._internalAssetData);
         }
+    }
+
+    /**
+     * Modifies the mask of this display component.
+     */
+    public get mask(): PIXI.Container | PIXI.MaskData {
+        return this._internalAssetData.mask;
+    }
+    public set mask(mask: PIXI.Container | PIXI.MaskData) {
+        if (mask === null || mask === undefined) {
+            if (this._internalAssetData.mask instanceof PIXI.Container) {
+                this.container.removeChild(this._internalAssetData.mask);
+            }
+        } else if (mask instanceof PIXI.Container) {
+            this.container.addChild(mask);
+        }
+        this._internalAssetData.mask = mask;
     }
 
     /**

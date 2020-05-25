@@ -105,7 +105,6 @@ export class PIXIRenderer implements IRenderer {
      * Draws the scene within the canvas.
      */
     public draw(): void {
-        // this._pixiRenderer.render(this._pixiApp.stage);
         this._pixiRenderer.render(this.container);
     }
 }

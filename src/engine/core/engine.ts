@@ -141,6 +141,11 @@ export class Engine {
         // Stand up the game which was passed into the engine start call.
         Engine._game = new Engine._gameType(Engine._gameConfig.gameData);
 
+        // Load all levels.
+        for (const level of Engine._renderer.levels) {
+            level.root.load();
+        }
+
         // Begin the update cycle.
         Engine._state = EngineState.RUNNING;
         Engine._lastUpdateTime = Date.now();

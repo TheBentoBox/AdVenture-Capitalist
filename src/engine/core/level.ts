@@ -26,7 +26,7 @@ export class Level {
      */
     public constructor(name: string, autoRegister: boolean = false) {
         this.name = name;
-        this.root = new Actor(this.name + "Root");
+        this.root = new Actor({ name: `${this.name}Root` });
 
         if (autoRegister) {
             Engine.renderer.addLevel(this);

@@ -1,18 +1,15 @@
 import { ITickable } from "../interfaces/ITickable";
 import { ControllerComponent } from "../components/controller/controllerComponent";
-import { Renderable } from "./renderable";
+import { Renderable, RenderableData } from "./renderable";
 import { Dictionary } from "./types";
 import { DisplayComponent } from "../components/display/displayComponent";
+
+export interface ActorData extends RenderableData { };
 
 /**
  * An actor which can be attached within a level's tree for drawing.
  */
-export class Actor<T extends Dictionary<any> = Partial<Dictionary<any>>> extends Renderable implements ITickable {
-
-    /**
-     * The data associated with this actor.
-     */
-    protected readonly _actorData: T;
+export class Actor<T extends ActorData = ActorData> extends Renderable<T> implements ITickable {
 
     /**
      * The name of this actor.
@@ -27,31 +24,38 @@ export class Actor<T extends Dictionary<any> = Partial<Dictionary<any>>> extends
     /**
      * The children of this actor. Children will be recursively updated and rendered in the order they were added.
      */
-    public readonly children: Dictionary<Actor>;
+    public readonly children: Dictionary<Actor> = {};
 
     /**
      * The controller components which operate on this actor's display components.
      */
-    public readonly controllerComponents: Dictionary<ControllerComponent>;
+    public readonly controllerComponents: Dictionary<ControllerComponent> = {};
 
     /**
      * The display components representing the visual state of this object.
      */
-    public readonly displayComponents: Dictionary<Renderable>;
+    public readonly displayComponents: Dictionary<Renderable> = {};
 
     /**
      * Instantiates a new actor with no children or components attached.
-     * @param name The name of this actor.
      * @param actorData The data this actor should be configured with.
      */
-    public constructor(name: string, actorData: T = {} as T) {
-        super();
-        this.name = name;
-        this._actorData = actorData;
+    public constructor(actorData: T = {} as T) {
+        super(actorData);
+        this.name = actorData.name;
+    }
 
-        this.children = {};
-        this.controllerComponents = {};
-        this.displayComponents = {};
+    /**
+     * Loads this actor, calling upon all of its components to load as well.
+     */
+    public load(): void {
+        super.load();
+        for (const componentName of Object.keys(this.displayComponents)) {
+            this.displayComponents[componentName].load();
+        }
+        for (const childName of Object.keys(this.children)) {
+            this.children[childName].load();
+        }
     }
 
     /**
