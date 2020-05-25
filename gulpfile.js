@@ -41,10 +41,28 @@ gulp.task("compile",
 
 
 /**
+ * Compiles the source code into JS into the ./dist/ folder.
+ */
+gulp.task("compile-development",
+    shell.task("webpack --config dev-webpack.config.js")
+);
+
+
+/**
  * The default gulp task when run without a task argument.
  * Builds the game into the output ./dist/ directory.
  */
 gulp.task("default", gulp.series(
     gulp.task("clean"),
     gulp.parallel("copy-game-assets", "copy-www", "compile")
+));
+
+
+/**
+ * Alternative build mode that uses the development mode of webpack for building.
+ * Builds the game into the output ./dist/ directory.
+ */
+gulp.task("development", gulp.series(
+    gulp.task("clean"),
+    gulp.parallel("copy-game-assets", "copy-www", "compile-development")
 ));

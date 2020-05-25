@@ -5,6 +5,7 @@
     "main": "index.js",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
+        "development": "./node_modules/.bin/gulp development",
         "build": "./node_modules/.bin/gulp"
     },
     "keywords": [
