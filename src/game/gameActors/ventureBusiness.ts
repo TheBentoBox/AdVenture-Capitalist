@@ -62,7 +62,7 @@ type VentureBusinessData = {
 /**
  * Represents one of the buyable businesses in the {@link AdVentureCapitalist} game.
  */
-export class VentureBusiness extends Actor {
+export class VentureBusiness extends Actor<VentureBusinessData> {
 
     /**
      * How much the first unit of this business costs to purchase.
@@ -102,15 +102,21 @@ export class VentureBusiness extends Actor {
      * @param businessData The configured data defining this business.
      */
     public constructor(name: string, businessData: VentureBusinessData) {
-        super(name);
+        super(name, businessData);
         this.profitMultipler = 1;
-        this.amountOwned = new Observable<number>(businessData.initialAmountOwned ?? 0);
+        this.amountOwned = new Observable<number>(this._actorData.initialAmountOwned ?? 0);
         this.timeInCycle = new Observable<number>(0);
 
+        // Attach the backplate.
+        this.addDisplayComponent(new SpriteComponent("Backplate", { assetName: "businessBackplate.png" }));
+
         // Attach the main display components.
-        this.addDisplayComponent(new SpriteComponent(VentureBusinessComponents.ICON, { assetName: businessData.icon }));
+        this.addDisplayComponent(new SpriteComponent(VentureBusinessComponents.ICON, { assetName: this._actorData.icon }));
         this.addDisplayComponent(new TextComponent(VentureBusinessComponents.AMOUNT_OWNED, { text: this.amountOwned }));
         this.addDisplayComponent(new TextComponent(VentureBusinessComponents.TIMER, { text: "" }));
+
+        this.iconComponent.transform.scale.x = 0.75;
+        this.iconComponent.transform.scale.y = 0.75;
 
         // Align the business amount owned with the bottom-middle of its icon.
         this.amountOwnedTextComponent.transform.position.x = ((this.iconComponent.container.width / 2) - (this.timerTextComponent.container.width / 2));
@@ -120,9 +126,9 @@ export class VentureBusiness extends Actor {
         this.timerTextComponent.transform.position.x = this.iconComponent.container.width + 15;
         this.timerTextComponent.transform.position.y = ((this.iconComponent.container.height / 2) - (this.timerTextComponent.container.height / 2));
 
-        this.baseCost = businessData.baseCost;
-        this.baseProfit = businessData.baseProfit;
-        this.baseCycleDuration = businessData.baseCycleDuration;
+        this.baseCost = this._actorData.baseCost;
+        this.baseProfit = this._actorData.baseProfit;
+        this.baseCycleDuration = this._actorData.baseCycleDuration;
 
         this.addControllerComponent(new BusinessController(this.name + "Controller", this));
     }
@@ -153,5 +159,12 @@ export class VentureBusiness extends Actor {
      */
     public get profit(): number {
         return (this.baseProfit * this.amountOwned.getValue() * this.profitMultipler * AdVentureCapitalist.instance.bank.globalProfitMultiplier);
+    }
+
+    /**
+     * Gets the amount it should cost to purchase the next unit of this business.
+     */
+    public get nextUnitCost(): number {
+        return (this.baseCost * Math.pow(1.07, this.amountOwned.getValue() - 1));
     }
 }

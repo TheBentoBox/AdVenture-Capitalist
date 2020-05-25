@@ -1,7 +1,11 @@
 {
     "assets": {
-        "assets/images/icon.png": "sprite",
-        "assets/images/cat.png": "sprite"
+        "assets/images/businessBackplate.png": "sprite",
+        "assets/images/lime.png": "sprite",
+        "assets/images/magazine.png": "sprite",
+        "assets/images/soap.png": "sprite",
+        "assets/images/spaghetti.png": "sprite",
+        "assets/images/muffin.png": "sprite"
     },
     "renderer": {
         "backgroundColor": "0xBDFFFF"
@@ -9,19 +13,85 @@
     "gameData": {
         "businesses": [
             {
-                "name": "Flowers",
-                "icon": "icon.png",
+                "name": "Limeade Stand",
+                "icon": "lime.png",
                 "initialAmountOwned": 1,
-                "baseCost": 10,
-                "baseProfit": 5,
-                "baseCycleDuration": 1
+                "baseCost": 4,
+                "baseProfit": 1,
+                "baseCycleDuration": 1,
+                "managerCost": 1000
             },
             {
-                "name": "Cats",
-                "icon": "cat.png",
-                "baseCost": 25,
-                "baseProfit": 15,
-                "baseCycleDuration": 5
+                "name": "Magazine Subscriptions",
+                "icon": "magazine.png",
+                "baseCost": 60,
+                "baseProfit": 60,
+                "baseCycleDuration": 4,
+                "managerCost": 15000
+            },
+            {
+                "name": "Car Showers",
+                "icon": "soap.png",
+                "baseCost": 720,
+                "baseProfit": 540,
+                "baseCycleDuration": 7,
+                "managerCost": 100000
+            },
+            {
+                "name": "Spaghetti Delivery",
+                "icon": "spaghetti.png",
+                "baseCost": 8640,
+                "baseProfit": 4320,
+                "baseCycleDuration": 12,
+                "managerCost": 500000
+            },
+            {
+                "name": "Muffin Shop",
+                "icon": "muffin.png",
+                "baseCost": 103680,
+                "baseProfit": 51840,
+                "baseCycleDuration": 25,
+                "managerCost": 1200000
+            },
+            {
+                "name": "Crab Boat",
+                "icon": "muffin.png",
+                "baseCost": 1244160,
+                "baseProfit": 622080,
+                "baseCycleDuration": 96,
+                "managerCost": 10000000
+            },
+            {
+                "name": "Lacrosse Team",
+                "icon": "muffin.png",
+                "baseCost": 14929920,
+                "baseProfit": 7464960,
+                "baseCycleDuration": 5,
+                "managerCost": 111111111
+            },
+            {
+                "name": "Music Studio",
+                "icon": "muffin.png",
+                "baseCost": 179159040,
+                "baseProfit": 89579520,
+                "baseCycleDuration": 5,
+                "managerCost": 555555555
+            },
+            {
+                "name": "Prisons",
+                "icon": "muffin.png",
+                "baseCost": 2149908480,
+                "baseProfit": 1074954240,
+                "baseCycleDuration": 5,
+                "managerCost": 10000000000
+            },
+            {
+                "name": "Diamond Mines",
+                "icon": "muffin.png",
+                "baseCost": 25798901760,
+                "baseProfit": 12899450880,
+                "baseCycleDuration": 5,
+                "managerCost": 100000000000
             }
         ]
     }

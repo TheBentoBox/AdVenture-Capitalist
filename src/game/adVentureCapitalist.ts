@@ -78,8 +78,11 @@ export class AdVentureCapitalist extends Game {
 
             // Create the actor which will represent this buyable object.
             const businessInstance = new VentureBusiness(business.name, business);
-            businessInstance.transform.position.x = 100;
-            businessInstance.transform.position.y = 100 + (i * 130);
+            businessInstance.transform.position.x = 300 + (Math.floor(i / 5) * 450);
+            businessInstance.transform.position.y = 50 + ((i % 5) * 175);
+
+            businessInstance.transform.scale.x = 0.85;
+            businessInstance.transform.scale.y = 0.85;
 
             // Add it to the game area level.
             this._gameArea.root.addChild(businessInstance);

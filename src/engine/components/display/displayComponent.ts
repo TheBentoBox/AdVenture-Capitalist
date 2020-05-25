@@ -7,7 +7,6 @@ import { Dictionary } from "../../core/types";
  */
 type DisplayComponentData = { assetName: string }
 
-
 /**
  * The base class for display components which can be attached to a {@link Actor}.
  * Subclasses should override {@link DisplayComponent.load} to specify their load behavior.
