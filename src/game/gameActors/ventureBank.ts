@@ -74,7 +74,7 @@ export class VentureBank extends Actor<VentureBankData> {
         const balanceText = new TextComponent({ name: "balanceText", text: this.balance, format: TextFormatMode.CURRENCY });
         balanceText.setStyle(new PIXI.TextStyle({
             fill: 0xFFFFFF,
-            fontSize: "72px",
+            fontSize: "64px",
             stroke: 0x888888,
             strokeThickness: 7
         }));
@@ -89,11 +89,38 @@ export class VentureBank extends Actor<VentureBankData> {
     }
 
     /**
+     * Lays out the manager buttons along the left half of the screen once they've been loaded.
+     * This fits them equally within the available space below the balance text.
+     */
+    public load(): void {
+        super.load();
+        const businesses = this._objectData.businesses;
+        const balanceText = this.getDisplayComponent<TextComponent>("balanceText");
+
+        // Start below the text. The available room is the remaining window height.
+        const startingHeight = (balanceText.transform.position.y + balanceText.container.height);
+        const availableRoom = (window.innerHeight - startingHeight);
+
+        // Determine how much space each button can take up, and therefore what their scales should be.
+        // We are assuming here that the businesses array is populated and that it has a manager button.
+        // If that weren't the case, something has gone catastrophically wrong anyway.
+        const heightPerButton = (availableRoom / businesses.length);
+        const scaleFactor = (heightPerButton / this.managerButtons[businesses[0].name].container.height);
+
+        // Lay out the buttons, beginning from the starting height below the balance text, calculated above.
+        let spawnHeight = startingHeight;
+        for (let i = 0; i < businesses.length; i++) {
+            const business = businesses[i];
+            this.managerButtons[business.name].transform.scale.set(scaleFactor);
+            this.managerButtons[business.name].transform.position.y = spawnHeight;
+            spawnHeight += heightPerButton;
+        }
+    }
+
+    /**
      * Iterates the business data and generates the manager buttons.
      */
     private createManagerButtons(): void {
-        let spawnHeight = 85;
-
         for (let i = 0; i < this._objectData.businesses.length; ++i) {
             const business = this._objectData.businesses[i];
 
@@ -102,17 +129,7 @@ export class VentureBank extends Actor<VentureBankData> {
             const managerButtonData: ButtonData = {
                 ...this._objectData.baseManagerButtonData,
                 name: business.name,
-                labels: (this._objectData.baseManagerButtonData.labels ?? []),
-                transform: {
-                    position: {
-                        x: 0,
-                        y: spawnHeight
-                    },
-                    scale: {
-                        x: 0.55,
-                        y: 0.55,
-                    }
-                }
+                labels: (this._objectData.baseManagerButtonData.labels ?? [])
             }
 
             // Instantiate the button, then attach the business's icon to it.
@@ -155,7 +172,6 @@ export class VentureBank extends Actor<VentureBankData> {
             // Attach it and store it.
             this.managerButtons[business.name] = managerButton;
             this.addChild(managerButton);
-            spawnHeight += 85;
         }
     }
 }

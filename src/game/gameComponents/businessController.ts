@@ -79,7 +79,7 @@ export class BusinessController extends ControllerComponent<VentureBusiness> {
         // Cycle complete, inform the rest of the game and reset.
         GameEvent.ON_CYCLE_COMPLETE.emit(this.actor);
         this.actor.timerTextComponent.setText(formatTime(this.actor.baseCycleDuration));
-        this.actor.timeInCycle.setValue(0);
+        this.actor.timeInCycle.adjust(-this.actor.baseCycleDuration);
         this._progressBarMask.scale.x = 0;
 
         // If there is no manager associated with this controller, it should automatically
@@ -138,11 +138,16 @@ export class BusinessController extends ControllerComponent<VentureBusiness> {
 
     /**
      * Updates the state of the business's buy button as well as its associated manager button.
-     * The manager button cannot become enabled if it has already been purchased.
      */
     private updateBuyButtonEnabledStates(): void {
         const currentBalance = AdVentureCapitalist.getInstance().bank.balance.getValue();
         this.actor.buyButton.isEnabled = (this.actor.getNextNextNthUnitsCost() <= currentBalance);
-        this._managerButton.isEnabled = (!this.hasManager && this.actor.managerCost <= currentBalance);
+
+        // The manager button cannot become enabled if it has already been purchased or no units are bought.
+        this._managerButton.isEnabled = (
+            !this.hasManager &&
+            this.actor.managerCost <= currentBalance &&
+            this.actor.amountOwned.getValue() > 0
+        );
     }
 }

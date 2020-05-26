@@ -74,6 +74,15 @@ export class Actor<T extends ActorData = ActorData> extends Renderable<T> implem
     }
 
     /**
+     * Gets a controller component by name from this actor.
+     * @param name The name of the controller component to retrieve.
+     * @returns The controller component, or undefined if it wasn't found.
+     */
+    public getControllerComponent<T extends ControllerComponent>(name: string): ControllerComponent {
+        return this.controllerComponents[name] as T;
+    }
+
+    /**
      * Removes a controller component from this actor.
      * @param theComponent The component to be removed.
      * @returns True if the component was removed successfully. Failure to remove generally indicates
@@ -102,6 +111,15 @@ export class Actor<T extends ActorData = ActorData> extends Renderable<T> implem
         this.container.addChild(theComponent.container);
         this.displayComponents[theComponent.name] = theComponent;
         return true;
+    }
+
+    /**
+     * Gets a display component by name from this actor.
+     * @param name The name of the display component to retrieve.
+     * @returns The display component, or undefined if it wasn't found.
+     */
+    public getDisplayComponent<T extends DisplayComponent>(name: string): DisplayComponent {
+        return this.displayComponents[name] as T;
     }
 
     /**
