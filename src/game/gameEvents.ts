@@ -11,10 +11,4 @@ export class GameEvent {
      * The emitted value is the business which completed its cycle.
      */
     public static readonly CYCLE_COMPLETE = new Signal<(business: VentureBusiness) => void>();
-
-    /**
-     * Emitted from whenever the main bank's balance is adjusted.
-     * The emitted value is the amount the balance was adjusted by.
-     */
-    public static readonly BALANCE_ADJUSTED = new Signal<(amount: number) => void>();
 }
