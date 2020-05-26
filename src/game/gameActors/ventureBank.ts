@@ -29,9 +29,25 @@ interface VentureBankData extends ActorData {
  * Each mode represents the number of businesses that would be purchased.
  */
 export enum PurchaseMode {
+
+    /**
+     * Buying one business unit at a time.
+     */
     ONE = 1,
+
+    /**
+     * Buying ten business units at a time.
+     */
     TEN = 10,
+
+    /**
+     * Buying 100 business units at a time.
+     */
     HUNDRED = 100,
+
+    /**
+     * Buying the maximum number of business units that the user can currently afford.
+     */
     MAX = -1,
 }
 
@@ -110,8 +126,7 @@ export class VentureBank extends Actor<VentureBankData> {
 
         // Lay out the buttons, beginning from the starting height below the balance text, calculated above.
         let spawnHeight = startingHeight;
-        for (let i = 0; i < businesses.length; i++) {
-            const business = businesses[i];
+        for (const business of businesses) {
             this.managerButtons[business.name].transform.scale.set(scaleFactor);
             this.managerButtons[business.name].transform.position.y = spawnHeight;
             spawnHeight += heightPerButton;
@@ -140,8 +155,7 @@ export class VentureBank extends Actor<VentureBankData> {
      * Iterates the business data and generates the manager buttons.
      */
     private createManagerButtons(): void {
-        for (let i = 0; i < this._objectData.businesses.length; ++i) {
-            const business = this._objectData.businesses[i];
+        for (const business of this._objectData.businesses) {
 
             // On top of the provided base data, ensure the labels array exists
             // and specify the transform based on the array position.

@@ -10,12 +10,21 @@ import { InteractionType } from "../../enums/interactionEvents";
  * The data required to instantiate a button.
  */
 export interface ButtonData extends RenderableData {
+
+    /**
+     * The display component to use as the button background.
+     */
     background: DisplayComponentData;
+
+    /**
+     * The labels to attach to this button component.
+     */
     labels: TextComponentData[];
 }
 
 /**
- * Represents a button. Buttons are inherently interactive, support a disabled state, and 
+ * Represents a button. Buttons are inherently interactive, support a disabled state, and have signals that can be
+ * subscribed to as a callback for numerous interaction events.
  */
 export class Button extends Actor<ButtonData> {
 
@@ -70,8 +79,9 @@ export class Button extends Actor<ButtonData> {
 
         this.addDisplayComponent(new SpriteComponent(this._objectData.background));
 
-        for (let i = 0; i < this._objectData.labels.length; ++i) {
-            this.addDisplayComponent(new TextComponent(this._objectData.labels[i]));
+        for (const labelData of this._objectData.labels) {
+            this.addDisplayComponent(new TextComponent(labelData));
+
         }
     }
 
@@ -99,7 +109,7 @@ export class Button extends Actor<ButtonData> {
      * Emits from the given signal if the button is currently enabled.
      * @param signal The signal to emit from.
      */
-    private emitInteractionEvent(signal: Signal): void {
+    private emitInteractionEvent(signal: Signal<(button: Button) => void>): void {
         if (this._isEnabled) {
             signal.emit(this);
         }

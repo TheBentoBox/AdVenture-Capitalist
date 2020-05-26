@@ -11,7 +11,7 @@ export interface TransformData {
 /**
  * A transform representing an object's location in 3D space. This is primarily used as an adapter level
  * between the internal PIXI container transforms to allow for the insertion of engine-level events.
- * 
+ *
  * The engine currently only renders in 2D but treating transforms as 3D is the most future-proof
  * approach and allows for rotations around the otherwise-unused z-axis.
  */

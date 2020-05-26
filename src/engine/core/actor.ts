@@ -5,7 +5,14 @@ import { Dictionary } from "./types";
 import { DisplayComponent } from "../components/display/displayComponent";
 import { ISaveable } from "../interfaces/ISaveable";
 
-export interface ActorData extends RenderableData { };
+/**
+ * The data that can be passed into an actor upon instantiation.
+ *
+ * Currently this is empty but it should exist in case of any actor-specific
+ * properties in the future so we don't have to go around retyping stuff.
+ */
+// tslint:disable-next-line:no-empty-interface
+export interface ActorData extends RenderableData { }
 
 /**
  * An actor which can be attached within a level's tree for drawing.
@@ -105,8 +112,8 @@ export class Actor<T extends ActorData = ActorData> extends Renderable<T> implem
      * @param name The name of the controller component to retrieve.
      * @returns The controller component, or undefined if it wasn't found.
      */
-    public getControllerComponent<T extends ControllerComponent>(name: string): ControllerComponent {
-        return this.controllerComponents[name] as T;
+    public getControllerComponent<U extends ControllerComponent>(name: string): ControllerComponent {
+        return this.controllerComponents[name] as U;
     }
 
     /**
@@ -145,8 +152,8 @@ export class Actor<T extends ActorData = ActorData> extends Renderable<T> implem
      * @param name The name of the display component to retrieve.
      * @returns The display component, or undefined if it wasn't found.
      */
-    public getDisplayComponent<T extends DisplayComponent>(name: string): DisplayComponent {
-        return this.displayComponents[name] as T;
+    public getDisplayComponent<U extends DisplayComponent>(name: string): DisplayComponent {
+        return this.displayComponents[name] as U;
     }
 
     /**
@@ -186,8 +193,8 @@ export class Actor<T extends ActorData = ActorData> extends Renderable<T> implem
      * @param name The name of the child to retrieve.
      * @returns The child, or undefined if it wasn't found.
      */
-    public getChild<T extends Actor>(name: string): Actor {
-        return this.children[name] as T;
+    public getChild<U extends Actor>(name: string): Actor {
+        return this.children[name] as U;
     }
 
     /**
@@ -211,10 +218,8 @@ export class Actor<T extends ActorData = ActorData> extends Renderable<T> implem
      * @param deltaTime The amount of time that has passed in seconds since the last update tick.
      */
     public update(deltaTime: number): void {
-        let component, child;
-
         for (const componentName of Object.keys(this.controllerComponents)) {
-            component = this.controllerComponents[componentName];
+            const component = this.controllerComponents[componentName];
             if (!component.isActive) {
                 continue;
             }
@@ -223,7 +228,7 @@ export class Actor<T extends ActorData = ActorData> extends Renderable<T> implem
         }
 
         for (const childName of Object.keys(this.children)) {
-            child = this.children[childName];
+            const child = this.children[childName];
             if (!child.isActive) {
                 continue;
             }

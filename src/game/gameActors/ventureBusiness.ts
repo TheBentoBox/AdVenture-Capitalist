@@ -155,8 +155,8 @@ export class VentureBusiness extends Actor<VentureBusinessData> {
         this._managerCost = this._objectData.managerCost;
 
         // Attach the back sprites.
-        for (let i = 0; i < businessData.backSprites.length; ++i) {
-            this.addDisplayComponent(new SpriteComponent(businessData.backSprites[i]));
+        for (const spriteData of businessData.backSprites) {
+            this.addDisplayComponent(new SpriteComponent(spriteData));
         }
 
         // Attach the main display components.

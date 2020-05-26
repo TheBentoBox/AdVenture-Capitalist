@@ -71,9 +71,9 @@ export class TextComponent extends DisplayComponent<PIXI.Text, TextComponentData
 
         // Default the starting text to an empty string if the text was set to watch an observable.
         const isObservable = (this._objectData.text instanceof Observable);
-        let startingText: string = (isObservable ? "" : String(this._objectData.text));
+        const initialText: string = (isObservable ? "" : String(this._objectData.text));
         this._internalAssetData = new PIXI.Text("", this._objectData.style);
-        this.setText(startingText);
+        this.setText(initialText);
 
         // Attach to the configured observable if applicable.
         if (isObservable) {

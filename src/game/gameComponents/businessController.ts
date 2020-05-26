@@ -33,8 +33,7 @@ export class BusinessController extends ControllerComponent<VentureBusiness> {
     /**
      * Constructs a new business controller which operates on the target business.
      * @param name The name of this business controller.
-     * @param business The business which this controller should manager.
-     * @param cycleTimerComponent The text component which should display the 
+     * @param business The business actor which this controller will manage.
      */
     public constructor(name: string, business: VentureBusiness) {
         super(name, business);
@@ -85,7 +84,7 @@ export class BusinessController extends ControllerComponent<VentureBusiness> {
 
             // Determine how far past the end of the cycle the actor would have "overshot".
             const timePassedInSeconds = ((Date.now() - lastPlayTime) / 1000);
-            let fullCycleTime = (this.actor.timeInCycle.getValue() + timePassedInSeconds);
+            const fullCycleTime = (this.actor.timeInCycle.getValue() + timePassedInSeconds);
 
             // Count the number of cycles the business could've run in that time, and
             // how far into the final cycle (the one we're resuming into) it would've made it.

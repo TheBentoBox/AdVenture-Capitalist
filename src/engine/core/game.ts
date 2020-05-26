@@ -22,10 +22,13 @@ export abstract class Game implements ITickable {
     }
 
     /**
-     * Performs update routines on the operating game class.
+     * Performs update routines on the operating game class. This must exist here on the base class
+     * so the engine can treat the game as tickable, but abstract isn't desireable as many games
+     * likely won't need an update loop within the game class itself.
      * @param deltaTime The time that has passed since the last tick
      */
-    public abstract update(deltaTime: number): void;
+    // tslint:disable-next-line:no-empty
+    public update(deltaTime: number): void { }
 
     /**
      * Triggers the game to save its current state in local storate.

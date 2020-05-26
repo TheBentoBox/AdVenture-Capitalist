@@ -74,12 +74,6 @@ export class AdVentureCapitalist extends Game {
     }
 
     /**
-     * Performs update routines on the game.
-     * @param deltaTime The time in seconds since the last update tick.
-     */
-    public update(deltaTime: number): void { }
-
-    /**
      * Creates the main game area where the buyable objects are displayed.
      */
     private createGameArea(): void {

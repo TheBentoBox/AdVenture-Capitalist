@@ -13,7 +13,7 @@ export class Observable<T> {
     /**
      * The signal emitted from when the internal value changes.
      */
-    private _onValueChanged: Signal;
+    private _onValueChanged: Signal<(value: T) => void>;
 
     /**
      * Indicates whether the value of this observable is numeric. If false, .adjust()
@@ -67,7 +67,7 @@ export class Observable<T> {
      * @param listener The object that will be listening to this observable.
      * @param callback The callback to call when the observed value changes.
      */
-    public subscribe(listener: any, callback: Function): void {
+    public subscribe(listener: any, callback: (value: T) => void): void {
         this._onValueChanged.subscribe(listener, callback);
         callback(this._value);
     }

@@ -1,21 +1,30 @@
 import { IDestroyable } from "../interfaces/IDestroyable";
 
-type SignalListenerEntry<T> = { listener: any, callback: T };
+/**
+ * Represents the entries describing each subscriber to a signal.
+ */
+type SignalListenerEntry<T> = {
+
+    /**
+     * The listening object.
+     */
+    listener: any,
+
+    /**
+     * The callback function to run upon signal emission.
+     */
+    callback: T
+};
 
 /**
  * Represents a basic signal which can be used to subscribe to events associated with an object.
  */
-export class Signal<T = Function> implements IDestroyable {
+export class Signal<T = () => void> implements IDestroyable {
 
     /**
      * The entries, each representing a single subscription to this signal.
      */
     private _listenerEntries: SignalListenerEntry<T>[] | undefined;
-
-    /**
-     * Stands up a new signal. The array of entries isn't instantiated until it is needed.
-     */
-    public constructor() { }
 
     /**
      * Clears out entry references held by this signal.
@@ -73,7 +82,7 @@ export class Signal<T = Function> implements IDestroyable {
         }
 
         for (const entry of this._listenerEntries) {
-            ((entry.callback as unknown) as Function)(value);
+            ((entry.callback as unknown) as (value?: any) => void)(value);
         }
     }
 }

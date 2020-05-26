@@ -42,13 +42,17 @@ export abstract class ControllerComponent<T extends Actor = Actor> implements IT
 
     /**
      * Controller components don't save or restore anything by default. This should be overridden by subclasses that
-     * wish to have save/restore behavior.
+     * wish to have save/restore behavior. Abstract isn't desireable because many controller likely don't need this
+     * functionality, but it should exist in the base class in case of future commonly saved properties on controllers.
      */
+    // tslint:disable-next-line:no-empty
     public save(): void { }
 
     /**
      * Controller components don't save or restore anything by default. This should be overridden by subclasses that
-     * wish to have save/restore behavior.
+     * wish to have save/restore behavior. Abstract isn't desireable because many controller likely don't need this
+     * functionality, but it should exist in the base class in case of future commonly saved properties on controllers.
      */
+    // tslint:disable-next-line:no-empty
     public restore(): void { }
 }
