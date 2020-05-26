@@ -20,6 +20,11 @@ export interface ButtonData extends RenderableData {
 export class Button extends Actor<ButtonData> {
 
     /**
+     * Whether or not this button is currently enabled.
+     */
+    protected _isEnabled: boolean = true;
+
+    /**
      * A signal that is emitted from when this button is clicked on.
      */
     public readonly onClick: Signal<(button: Button) => void>;
@@ -57,16 +62,46 @@ export class Button extends Actor<ButtonData> {
         this.onOut = new Signal();
 
         this.container.interactive = true;
-        this.container.addListener(InteractionType.MOUSE_CLICK, this.onClick.emit.bind(this.onClick, this));
-        this.container.addListener(InteractionType.MOUSE_DOWN, this.onDown.emit.bind(this.onDown, this));
-        this.container.addListener(InteractionType.MOUSE_UP, this.onUp.emit.bind(this.onUp, this));
-        this.container.addListener(InteractionType.MOUSE_OVER, this.onOver.emit.bind(this.onOver, this));
-        this.container.addListener(InteractionType.MOUSE_OUT, this.onOut.emit.bind(this.onOut, this));
+        this.container.addListener(InteractionType.MOUSE_CLICK, this.emitInteractionEvent.bind(this, this.onClick));
+        this.container.addListener(InteractionType.MOUSE_DOWN, this.emitInteractionEvent.bind(this, this.onDown));
+        this.container.addListener(InteractionType.MOUSE_UP, this.emitInteractionEvent.bind(this, this.onUp));
+        this.container.addListener(InteractionType.MOUSE_OVER, this.emitInteractionEvent.bind(this, this.onOver));
+        this.container.addListener(InteractionType.MOUSE_OUT, this.emitInteractionEvent.bind(this, this.onOut));
 
         this.addDisplayComponent(new SpriteComponent(this._objectData.background));
 
         for (let i = 0; i < this._objectData.labels.length; ++i) {
             this.addDisplayComponent(new TextComponent(this._objectData.labels[i]));
+        }
+    }
+
+    /**
+     * Toggles whether or not this button is currently enabled.
+     */
+    public get isEnabled(): boolean {
+        return this._isEnabled;
+    }
+    public set isEnabled(value: boolean) {
+        this._isEnabled = value;
+
+        // Make the button grayscale while disabled.
+        // TODO Make this configurable.
+        if (value) {
+            this.container.filters = [];
+        } else {
+            const desaturateFilter = new PIXI.filters.ColorMatrixFilter();
+            desaturateFilter.desaturate();
+            this.container.filters = [desaturateFilter];
+        }
+    }
+
+    /**
+     * Emits from the given signal if the button is currently enabled.
+     * @param signal The signal to emit from.
+     */
+    private emitInteractionEvent(signal: Signal): void {
+        if (this._isEnabled) {
+            signal.emit(this);
         }
     }
 }
