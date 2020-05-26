@@ -11,7 +11,7 @@ The basic structure of the engine is as follows:
 These combine to produce an MVC-esque structure to the engine. Actors are your "models", display components are the view, and controller components are, as the name implies, your controllers. Actors can have components of any kind attached to them willy-nilly, but you are encouraged to give each actor an API to access key display components which controller components can then access. An example of this can be seen in the [VentureBusiness actor](https://github.com/TheBentoBox/VenturaEngine/blob/master/src/game/gameActors/ventureBusiness.ts), which uses an internal (not exported) enum to explicitly define names for some of its components, which it then returns via getters.
 
 ### Other bits:
-* **Signals**: These are basic subscribable objects which can have values emitted from them with `signal.emit(...values)`. These are primarily useful for event/notification systems.
+* **Signals**: These are basic subscribable objects which can have values emitted from them with `signal.emit(value)`. These are primarily useful for event/notification systems.
 * **Observable**: These are essentially a field wrapped by a signal. Observables have their value set and retrieved via `observable.setValue(value)` and `observable.getValue()`, respectively. Then, just like with signals, you can `subscribe()` and `unsubscribe()` from an observable, which means you'll be notified when its value changes.
 
 ## The Game
