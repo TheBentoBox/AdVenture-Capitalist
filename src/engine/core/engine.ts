@@ -4,6 +4,7 @@ import { Game } from "./game";
 import { Dictionary } from "./types";
 import { AssetLoader } from "./assetLoader";
 import { IRenderer } from "../interfaces/IRenderer";
+import { LocalStrorageHandler } from "./localStorageHandler";
 
 /**
  * Represents the data shape of the constructor for a class extending {@link Game}.
@@ -19,6 +20,17 @@ export class Engine {
      * The path to the core game config which the engine must load to progress.
      */
     private static readonly _gameConfigPath = "assets/gameConfig.json";
+
+    /**
+     * How frequently the game should save automatically, in seconds.
+     * If set to 0 in gameConfig.autoSaveInterval, auto-saving will be disabled.
+     */
+    private static _autoSaveInterval: number;
+
+    /**
+     * How long it has been since the last automatic save, in seconds.
+     */
+    private static _timeSinceLastAutoSave: number = 0;
 
     /**
      * The registered game type that the engine will instantiate.
@@ -58,6 +70,12 @@ export class Engine {
     private static _state: EngineState = EngineState.IDLE;
 
     /**
+     * The main local storage handler, instantiated when the game config loads using its gameName field as the key prefix.
+     * Other local storage handlers can be instantiated freely to manipulate fields with a different key prefix.
+     */
+    private static _localStorage: LocalStrorageHandler;
+
+    /**
      * The engine is started via {@link Engine.start} by passing in a valid {@link Game} subclass.
      */
     private constructor() { }
@@ -76,6 +94,15 @@ export class Engine {
      */
     public static get renderer(): IRenderer {
         return Engine._renderer;
+    }
+
+    /**
+     * The main local storage handler, instantiated when the game config loads using its gameName field as the key prefix.
+     * Other local storage handlers can be instantiated freely to manipulate fields with a different key prefix.
+     * @returns The main local storage handler.
+     */
+    public static get localStorage(): LocalStrorageHandler {
+        return Engine._localStorage;
     }
 
     /**
@@ -112,6 +139,13 @@ export class Engine {
         Engine._game.update(deltaTime);
         Engine._renderer.update(deltaTime);
 
+        // Save the game if enough time has passed for an auto-save.
+        Engine._timeSinceLastAutoSave += deltaTime;
+        if (Engine._autoSaveInterval > 0 && Engine._timeSinceLastAutoSave >= Engine._autoSaveInterval) {
+            Engine._game.saveGame();
+            Engine._timeSinceLastAutoSave -= Engine._autoSaveInterval;
+        }
+
         Engine._lastUpdateTime = Date.now();
         requestAnimationFrame(Engine.tick);
     }
@@ -125,9 +159,15 @@ export class Engine {
     private static onGameConfigLoaded(loader: PIXI.Loader, loadedResources: Dictionary<any>): void {
         const gameConfig = loadedResources[Engine._gameConfigPath].data;
         Engine._gameConfig = gameConfig;
-        Engine._renderer = new PIXIRenderer([], gameConfig.renderer);
 
-        // Now that we have the core game config, enter the loading stage and load the configured required assets.
+        // Create the local storage handler with the game name as the key prefix, if one was provided.
+        Engine._localStorage = new LocalStrorageHandler(`${gameConfig.gameName}:` ?? "");
+
+        // Allow for a configurable auto-save interval, but default to every 60 seconds.
+        Engine._autoSaveInterval = (gameConfig.autoSaveInterval ?? 60);
+
+        // Now that we have the core game config, enter the loading stage and load the stage and configured required assets.
+        Engine._renderer = new PIXIRenderer([], gameConfig.renderer);
         Engine._state = EngineState.LOADING;
         AssetLoader.onAssetGroupLoaded.subscribe(Engine, Engine.startGame);
         AssetLoader.loadAssets(gameConfig.assets);
@@ -136,19 +176,32 @@ export class Engine {
     /**
      * Starts the actual game. This is only called once all necessary game assets are done loading.
      */
-    private static startGame() {
+    private static startGame(): void {
 
         // Stand up the game which was passed into the engine start call.
         Engine._game = new Engine._gameType(Engine._gameConfig.gameData);
+
+        // Now that the game is created, listen for the unload event to save the game.
+        window.addEventListener("beforeunload", Engine.onBeforeUnload);
 
         // Load all levels.
         for (const level of Engine._renderer.levels) {
             level.root.load();
         }
 
+        // Post-load, try to restore the game state from where it was left off.
+        Engine._game.restoreGame();
+
         // Begin the update cycle.
         Engine._state = EngineState.RUNNING;
         Engine._lastUpdateTime = Date.now();
         Engine.tick();
+    }
+
+    /**
+     * Called when the tab is being closed to trigger a game save.
+     */
+    private static onBeforeUnload(): void {
+        Engine._game.saveGame();
     }
 }

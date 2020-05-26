@@ -3,13 +3,14 @@ import { ControllerComponent } from "../components/controller/controllerComponen
 import { Renderable, RenderableData } from "./renderable";
 import { Dictionary } from "./types";
 import { DisplayComponent } from "../components/display/displayComponent";
+import { ISaveable } from "../interfaces/ISaveable";
 
 export interface ActorData extends RenderableData { };
 
 /**
  * An actor which can be attached within a level's tree for drawing.
  */
-export class Actor<T extends ActorData = ActorData> extends Renderable<T> implements ITickable {
+export class Actor<T extends ActorData = ActorData> extends Renderable<T> implements ITickable, ISaveable {
 
     /**
      * The name of this actor.
@@ -55,6 +56,32 @@ export class Actor<T extends ActorData = ActorData> extends Renderable<T> implem
         }
         for (const childName of Object.keys(this.children)) {
             this.children[childName].load();
+        }
+    }
+
+    /**
+     * Actors don't save or restore anything by default. This should be overridden by subclasses that
+     * wish to have save/restore behavior.
+     */
+    public save(): void {
+        for (const componentName of Object.keys(this.controllerComponents)) {
+            this.controllerComponents[componentName].save();
+        }
+        for (const childName of Object.keys(this.children)) {
+            this.children[childName].save();
+        }
+    }
+
+    /**
+     * Actors don't save or restore anything by default. This should be overridden by subclasses that
+     * wish to have save/restore behavior.
+     */
+    public restore(): void {
+        for (const componentName of Object.keys(this.controllerComponents)) {
+            this.controllerComponents[componentName].restore();
+        }
+        for (const childName of Object.keys(this.children)) {
+            this.children[childName].restore();
         }
     }
 
@@ -152,6 +179,15 @@ export class Actor<T extends ActorData = ActorData> extends Renderable<T> implem
         this.container.addChild(theChild.container);
         this.children[theChild.name] = theChild;
         return true;
+    }
+
+    /**
+     * Gets a child by name from this actor.
+     * @param name The name of the child to retrieve.
+     * @returns The child, or undefined if it wasn't found.
+     */
+    public getChild<T extends Actor>(name: string): Actor {
+        return this.children[name] as T;
     }
 
     /**

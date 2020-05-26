@@ -2,6 +2,7 @@ import { Game } from "../engine/core/game";
 import { Level } from "../engine/core/level";
 import { VentureBusiness } from "./gameActors/ventureBusiness";
 import { VentureBank } from "./gameActors/ventureBank";
+import { Engine } from "../engine/core/engine";
 
 /**
  * For internal use within the game class.
@@ -39,6 +40,23 @@ export class AdVentureCapitalist extends Game {
         AdVentureCapitalist._instance = this;
 
         this.createGameArea();
+    }
+
+    /**
+     * Saves the game's state. Most of the saving is handled by the custom game actors (bank, businesses, etc.),
+     * so all this class saves itself is the last time played for simulating time passed on restore.
+     */
+    public saveGame(): void {
+        Engine.localStorage.setValue("LastPlayed", Date.now());
+        this._gameArea.root.save();
+    }
+
+    /**
+     * Restores all objects in this game's level. The bank and business actors should be attached to the level already
+     * by the time this is called, which means they're initialized and ready to be restored.
+     */
+    public restoreGame(): void {
+        this._gameArea.root.restore();
     }
 
     /**

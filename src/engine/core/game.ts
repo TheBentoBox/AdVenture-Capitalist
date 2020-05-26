@@ -26,4 +26,14 @@ export abstract class Game implements ITickable {
      * @param deltaTime The time that has passed since the last tick
      */
     public abstract update(deltaTime: number): void;
+
+    /**
+     * Triggers the game to save its current state in local storate.
+     */
+    public abstract saveGame(): void;
+
+    /**
+     * Triggers the game to restore itself from local storage.
+     */
+    public abstract restoreGame(): void;
 }

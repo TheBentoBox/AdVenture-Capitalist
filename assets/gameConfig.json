@@ -1,4 +1,5 @@
 {
+    "gameName": "AdVenture Capitalist",
     "assets": {
         "assets/images/businessBackplate.png": "sprite",
         "assets/images/managerBackplate.png": "sprite",

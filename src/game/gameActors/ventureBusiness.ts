@@ -7,6 +7,7 @@ import { BusinessController } from "../gameComponents/businessController";
 import { AdVentureCapitalist } from "../adVentureCapitalist";
 import { DisplayComponentData } from "../../engine/components/display/displayComponent";
 import { BusinessBuyButton } from "./businessBuyButton";
+import { Engine } from "../../engine/core/engine";
 
 /**
  * For internal use within the game class.
@@ -106,23 +107,22 @@ export class VentureBusiness extends Actor<VentureBusinessData> {
      * How much the first unit of this business costs to purchase.
      * The cost of buying a business costs more as more of them are purchased.
      */
-    public readonly baseCost: number;
+    protected _baseCost: number;
 
     /**
      * How much this business earns per cycle per unit.
      */
-    public readonly baseProfit: number;
+    protected _baseProfit: number;
 
     /**
      * The amount of time one cycle should take to run for this business.
-     * This can decrease based on upgrades.
      */
-    public readonly baseCycleDuration: number;
+    protected _baseCycleDuration: number;
 
     /**
      * The amount this business's manager costs.
      */
-    public readonly managerCost: number;
+    protected _managerCost: number;
 
     /**
      * The profit multiplier applied to this business.
@@ -149,10 +149,10 @@ export class VentureBusiness extends Actor<VentureBusinessData> {
         this.amountOwned = new Observable<number>(this._objectData.initialAmountOwned ?? 0);
         this.timeInCycle = new Observable<number>(0);
 
-        this.baseCost = this._objectData.baseCost;
-        this.baseProfit = this._objectData.baseProfit;
-        this.baseCycleDuration = this._objectData.baseCycleDuration;
-        this.managerCost = this._objectData.managerCost;
+        this._baseCost = this._objectData.baseCost;
+        this._baseProfit = this._objectData.baseProfit;
+        this._baseCycleDuration = this._objectData.baseCycleDuration;
+        this._managerCost = this._objectData.managerCost;
 
         // Attach the back sprites.
         for (let i = 0; i < businessData.backSprites.length; ++i) {
@@ -195,6 +195,58 @@ export class VentureBusiness extends Actor<VentureBusinessData> {
         progressBarMask.scale.set(0, 1);
         this.progressBar.mask = progressBarMask;
     }
+
+    /**
+     * Saves this business's data in the local storage.
+     */
+    public save(): void {
+        super.save();
+        Engine.localStorage.setValue(`${this.name}:baseCycleDuration`, this.baseCycleDuration);
+        Engine.localStorage.setValue(`${this.name}:profitMultipler`, this.profitMultipler);
+        Engine.localStorage.setValue(`${this.name}:timeInCycle`, this.timeInCycle.getValue());
+        Engine.localStorage.setValue(`${this.name}:amountOwned`, this.amountOwned.getValue());
+    }
+
+    /**
+     * Restores this business's data from the local storage.
+     */
+    public restore(): void {
+        this._baseCycleDuration = Engine.localStorage.getNumber(`${this.name}:baseCycleDuration`, this.baseCycleDuration);
+        this.profitMultipler = Engine.localStorage.getNumber(`${this.name}:profitMultipler`, this.profitMultipler);
+        this.timeInCycle.setValue(Engine.localStorage.getNumber(`${this.name}:timeInCycle`, 0));
+        this.amountOwned.setValue(Engine.localStorage.getNumber(`${this.name}:amountOwned`, this._objectData.initialAmountOwned ?? 0));
+        super.restore();
+    }
+
+    /**
+     * Gets how much the first unit of this business costs to purchase.
+     * The cost of buying a business costs more as more of them are purchased.
+     */
+    public get baseCost(): number {
+        return this._baseCost;
+    }
+
+    /**
+     * Gets how much this business earns per cycle per unit.
+     */
+    public get baseProfit(): number {
+        return this._baseProfit;
+    }
+
+    /**
+     * Gets the amount of time one cycle should take to run for this business.
+     */
+    public get baseCycleDuration(): number {
+        return this._baseCycleDuration;
+    }
+
+    /**
+     * Gets the amount this business's manager costs.
+     */
+    public get managerCost(): number {
+        return this._managerCost;
+    }
+
 
     /**
      * Returns the sprite component displaying this business's configured icon.

@@ -6,6 +6,7 @@ import { VentureBusiness, VentureBusinessData } from "./ventureBusiness";
 import { ButtonData, Button } from "../../engine/actors/ui/button";
 import { SpriteComponent } from "../../engine/components/display/spriteComponent";
 import { Dictionary } from "../../engine/core/types";
+import { Engine } from "../../engine/core/engine";
 
 /**
  * The data that must be passed into the bank for it to function.
@@ -67,7 +68,7 @@ export class VentureBank extends Actor<VentureBankData> {
         super(actorData);
         this.purchaseMode = new Observable<PurchaseMode>(PurchaseMode.ONE);
         this.globalProfitMultiplier = new Observable<number>(1);
-        this.balance = new Observable<number>(1000);
+        this.balance = new Observable<number>(0);
         this.managerButtons = {};
 
         // Create the text component that will display the balance.
@@ -115,6 +116,24 @@ export class VentureBank extends Actor<VentureBankData> {
             this.managerButtons[business.name].transform.position.y = spawnHeight;
             spawnHeight += heightPerButton;
         }
+    }
+
+    /**
+     * Saves the bank's data in local storage.
+     */
+    public save(): void {
+        super.save();
+        Engine.localStorage.setValue("Balance", this.balance.getValue());
+        Engine.localStorage.setValue("GlobalProfitMultiplier", this.globalProfitMultiplier.getValue());
+    }
+
+    /**
+     * Restores the bank's data in local storage.
+     */
+    public restore(): void {
+        super.restore();
+        this.balance.setValue(Engine.localStorage.getNumber("Balance", 0));
+        this.globalProfitMultiplier.setValue(Engine.localStorage.getNumber("GlobalProfitMultiplier", 1));
     }
 
     /**
