@@ -1,7 +1,7 @@
 import { Game } from "../engine/core/game";
 import { Level } from "../engine/core/level";
 import { VentureBusiness } from "./gameActors/ventureBusiness";
-import { VentureBank } from "./gameActors/ventureBank/ventureBank";
+import { VentureBank } from "./gameActors/ventureBank";
 
 /**
  * For internal use within the game class.
@@ -35,11 +35,10 @@ export class AdVentureCapitalist extends Game {
         if (AdVentureCapitalist._instance !== undefined) {
             throw new Error("Attempted to create an instance of the game class when one already was made")
         }
-
         super(gameData);
-        this.createGameArea();
-
         AdVentureCapitalist._instance = this;
+
+        this.createGameArea();
     }
 
     /**
@@ -69,16 +68,18 @@ export class AdVentureCapitalist extends Game {
         this._gameArea = new Level("GameArea", true);
 
         // Create the bank that will manage the balance.
-        const bank = new VentureBank("mainBank");
+        const bank = new VentureBank({ name: "mainBank" });
         this._gameArea.root.addChild(bank);
+
+        const baseBusinessData = this._gameData.baseBusinessData ?? {};
 
         // Create the business objects for each configured business.
         for (let i = 0; i < this._gameData.businesses.length; ++i) {
             const business = this._gameData.businesses[i];
 
             // Create the actor which will represent this buyable object.
-            const businessInstance = new VentureBusiness(business.name, business);
-            businessInstance.transform.position.x = 300 + (Math.floor(i / 5) * 450);
+            const businessInstance = new VentureBusiness({ ...baseBusinessData, ...business });
+            businessInstance.transform.position.x = 450 + (Math.floor(i / 5) * 450);
             businessInstance.transform.position.y = 50 + ((i % 5) * 175);
 
             businessInstance.transform.scale.x = 0.85;

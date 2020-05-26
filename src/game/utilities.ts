@@ -6,11 +6,11 @@
 export function formatTime(timeInSeconds: number) {
     let hours = Math.max(Math.floor(timeInSeconds / 3600), 0);
     let minutes = Math.max(Math.floor((timeInSeconds % 3600) / 60), 0);
-    let seconds = Math.max(Math.ceil(timeInSeconds % 60), 0);
+    let seconds = Math.max(Math.floor(timeInSeconds % 60), 0);
 
-    let timeValue = (hours < 10 ? `0${hours}` : String(hours));
-    timeValue += (minutes < 10 ? `:0${minutes}` : String(minutes));
-    timeValue += (seconds < 10 ? `:0${seconds}` : String(seconds));
+    let timeValue = `${hours < 10 ? `0${hours}` : hours}`;
+    timeValue += `:${minutes < 10 ? `0${minutes}` : minutes}`;
+    timeValue += `:${seconds < 10 ? `0${seconds}` : seconds}`;
 
     return timeValue;
 }

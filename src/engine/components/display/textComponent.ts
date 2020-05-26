@@ -156,9 +156,13 @@ export class TextComponent extends DisplayComponent<PIXI.Text, TextComponentData
             // Treat each component separately as one may be provided when the other isn't.
             if (this._maxSize.x > 0 && textMetrics.width > this._maxSize.x) {
                 this.transform.scale.x = (this._maxSize.x / textMetrics.width);
+            } else {
+                this.transform.scale.x = 1;
             }
             if (this._maxSize.y > 0 && textMetrics.height > this._maxSize.y) {
                 this.transform.scale.y = (this._maxSize.y / textMetrics.height);
+            } else {
+                this.transform.scale.y = 1;
             }
         }
     }
