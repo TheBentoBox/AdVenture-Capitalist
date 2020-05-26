@@ -1,12 +1,15 @@
 import { DisplayComponent, DisplayComponentData } from "./displayComponent";
 import { Observable } from "../../core/observable";
 import { Signal } from "../../core/signal";
+import { TextMetrics } from "pixi.js";
+import { VectorData, Vector3 } from "../../math/vector3";
 
 /**
  * The data shape that gets passed into the display component constructor for configuration purposes.
  */
 export interface TextComponentData extends DisplayComponentData {
     text: string | Observable<number> | Observable<string>,
+    maxSize?: VectorData,
     format?: TextFormatMode,
     style?: Partial<PIXI.TextStyle>
 }
@@ -39,9 +42,14 @@ export class TextComponent extends DisplayComponent<PIXI.Text, TextComponentData
     private _attachedObservable?: Observable<number> | Observable<string>;
 
     /**
+     * The maximum size the text is allowed to be in pixels in each dimension.
+     */
+    private _maxSize: Vector3;
+
+    /**
      * The currency formatter which text component used when their text format is set to {@link TextFormatMode.CURRENCY}.
      */
-    public static currencyFormatter: Intl.NumberFormat = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
+    public static currencyFormatter: Intl.NumberFormat = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 2 });
 
     /**
      * Emitted from when the text value of this component changes.
@@ -54,6 +62,7 @@ export class TextComponent extends DisplayComponent<PIXI.Text, TextComponentData
      */
     public constructor(objectData: TextComponentData) {
         super(objectData);
+        this._maxSize = new Vector3().configure(objectData.maxSize ?? {});
 
         // Default the format mode to text.
         if (this._objectData.format === undefined) {
@@ -95,10 +104,13 @@ export class TextComponent extends DisplayComponent<PIXI.Text, TextComponentData
 
         this._internalAssetData.text = String(newText);
 
+        // Create the signal if it doesn't exist yet for some reason, then emit the change.
         if (this.onTextChanged === undefined) {
             this.onTextChanged = new Signal<(component?: TextComponent) => void>();
         }
         this.onTextChanged.emit(this);
+
+        this.fitToMaxSize();
     }
 
     /**
@@ -107,6 +119,7 @@ export class TextComponent extends DisplayComponent<PIXI.Text, TextComponentData
      */
     public setStyle(newStyle: PIXI.TextStyle): void {
         this._internalAssetData.style = newStyle;
+        this.fitToMaxSize();
     }
 
     /**
@@ -118,6 +131,9 @@ export class TextComponent extends DisplayComponent<PIXI.Text, TextComponentData
 
         observable.subscribe(this, this.setText.bind(this));
         this._attachedObservable = observable;
+
+        // Call this here because attaching may immediately cause an update to the text value.
+        this.fitToMaxSize();
     }
 
     /**
@@ -127,6 +143,23 @@ export class TextComponent extends DisplayComponent<PIXI.Text, TextComponentData
         if (this._attachedObservable !== undefined) {
             this._attachedObservable.unsubscribe(this);
             this._attachedObservable = undefined;
+        }
+    }
+
+    /**
+     * Fits the text within the max size settings if they were set.
+     */
+    private fitToMaxSize(): void {
+        if (this._maxSize.x > 0 || this._maxSize.y > 0) {
+            const textMetrics = TextMetrics.measureText(this._internalAssetData.text, this._internalAssetData.style);
+
+            // Treat each component separately as one may be provided when the other isn't.
+            if (this._maxSize.x > 0 && textMetrics.width > this._maxSize.x) {
+                this.transform.scale.x = (this._maxSize.x / textMetrics.width);
+            }
+            if (this._maxSize.y > 0 && textMetrics.height > this._maxSize.y) {
+                this.transform.scale.y = (this._maxSize.y / textMetrics.height);
+            }
         }
     }
 }
