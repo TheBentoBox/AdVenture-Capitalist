@@ -1,5 +1,5 @@
 import { Actor, ActorData } from "../../engine/core/actor";
-import { TextComponent } from "../../engine/components/display/textComponent";
+import { TextComponent, TextFormatMode } from "../../engine/components/display/textComponent";
 import { SpriteComponent } from "../../engine/components/display/spriteComponent";
 import { ButtonData } from "../../engine/actors/ui/button";
 import { Observable } from "../../engine/core/observable";
@@ -21,6 +21,11 @@ enum VentureBusinessUIParts {
     ICON = "icon",
 
     /**
+     * The text component displaying the current profit of this business.
+     */
+    PROFIT = "profitText",
+
+    /**
      * The sprite component representing the area where the timer text should go.
      */
     TIMER_AREA = "timerArea",
@@ -33,7 +38,7 @@ enum VentureBusinessUIParts {
     /**
      * The text component displaying the number of units of this business that have been purchased.
      */
-    AMOUNT_OWNED = "amountOwnedText",
+    UNITS_OWNED = "unitsOwnedText",
 
     /**
      * The text component displaying the number of units of this business that have been purchased.
@@ -95,7 +100,7 @@ export interface VentureBusinessData extends ActorData {
     /**
      * The number of units of this business that should be owned by default for a fresh game.
      */
-    initialAmountOwned: number,
+    initialUnitsOwned: number,
 }
 
 /**
@@ -135,9 +140,9 @@ export class VentureBusiness extends Actor<VentureBusinessData> {
     public timeInCycle: Observable<number>;
 
     /**
-     * The number of instances of this business owned.
+     * The number of units of this business owned.
      */
-    public amountOwned: Observable<number>;
+    public unitsOwned: Observable<number>;
 
     /**
      * Constructs a new business.
@@ -146,7 +151,7 @@ export class VentureBusiness extends Actor<VentureBusinessData> {
     public constructor(businessData: VentureBusinessData) {
         super(businessData);
         this.profitMultipler = 1;
-        this.amountOwned = new Observable<number>(this._objectData.initialAmountOwned ?? 0);
+        this.unitsOwned = new Observable<number>(this._objectData.initialUnitsOwned ?? 0);
         this.timeInCycle = new Observable<number>(0);
 
         this._baseCost = this._objectData.baseCost;
@@ -159,14 +164,15 @@ export class VentureBusiness extends Actor<VentureBusinessData> {
             this.addDisplayComponent(new SpriteComponent(spriteData));
         }
 
-        // Attach the main display components.
+        // Attach the icon representing this business.
         const businessIcon = new SpriteComponent({ name: VentureBusinessUIParts.ICON, assetName: this._objectData.icon });
         businessIcon.transform.scale.set(0.75);
         this.addDisplayComponent(businessIcon);
-        this.addDisplayComponent(new TextComponent({ name: VentureBusinessUIParts.AMOUNT_OWNED, text: this.amountOwned }));
 
-        // Attach the timer last so it appears on top of the progress bar.
+        // Attach the descriptive text components.
+        this.addDisplayComponent(new TextComponent({ name: VentureBusinessUIParts.UNITS_OWNED, text: this.unitsOwned }));
         this.addDisplayComponent(new TextComponent({ name: VentureBusinessUIParts.TIMER, text: "", style: { fontFamily: "Arial", fill: 0xFFFFFF } }));
+        this.addDisplayComponent(new TextComponent({ name: VentureBusinessUIParts.PROFIT, text: `${this._baseProfit}`, format: TextFormatMode.CURRENCY, maxSize: { x: 200 } }));
 
         // Add the buy button after everything but before the controller.
         this.addChild(new BusinessBuyButton({ ...this._objectData.buyButton, name: VentureBusinessUIParts.BUY_BUTTON }))
@@ -182,12 +188,16 @@ export class VentureBusiness extends Actor<VentureBusinessData> {
         super.load();
 
         // Align the business amount owned with the bottom-middle of its icon.
-        this.amountOwnedTextComponent.transform.position.x = ((this.iconComponent.container.width / 2) - (this.amountOwnedTextComponent.container.width / 2));
-        this.amountOwnedTextComponent.transform.position.y = (this.iconComponent.container.height + 10);
+        this.unitsOwnedTextComponent.transform.position.x = ((this.iconComponent.container.width / 2) - (this.unitsOwnedTextComponent.container.width / 2));
+        this.unitsOwnedTextComponent.transform.position.y = (this.iconComponent.container.height + 10);
+
+        // Align the business profit value to the left-middle of the progress bar.
+        this.profitTextComponent.transform.position.x = (this.progressBar.transform.position.x + 35);
+        this.profitTextComponent.transform.position.y = (this.progressBar.transform.position.y + (this.progressBar.container.height / 2) - (this.profitTextComponent.container.height / 2));
 
         // Align the business timer to the right-middle of its icon.
-        this.timerTextComponent.transform.position.x = (this.progressBar.transform.position.x + (this.progressBar.container.width / 2) - (this.timerTextComponent.container.width / 2));
-        this.timerTextComponent.transform.position.y = (this.progressBar.transform.position.y + (this.progressBar.container.height / 2) - (this.timerTextComponent.container.height / 2));
+        this.timerTextComponent.transform.position.x = (this.timerAreaComponent.transform.position.x + (this.timerAreaComponent.container.width / 2) - (this.timerTextComponent.container.width / 2));
+        this.timerTextComponent.transform.position.y = (this.timerAreaComponent.transform.position.y + (this.timerAreaComponent.container.height / 2) - (this.timerTextComponent.container.height / 2));
 
         // Now that alignment is done, add the mask to the progress bar.
         // The mask affects the container width/height measurements.
@@ -204,7 +214,7 @@ export class VentureBusiness extends Actor<VentureBusinessData> {
         Engine.localStorage.setValue(`${this.name}:baseCycleDuration`, this.baseCycleDuration);
         Engine.localStorage.setValue(`${this.name}:profitMultipler`, this.profitMultipler);
         Engine.localStorage.setValue(`${this.name}:timeInCycle`, this.timeInCycle.getValue());
-        Engine.localStorage.setValue(`${this.name}:amountOwned`, this.amountOwned.getValue());
+        Engine.localStorage.setValue(`${this.name}:unitsOwned`, this.unitsOwned.getValue());
     }
 
     /**
@@ -214,7 +224,7 @@ export class VentureBusiness extends Actor<VentureBusinessData> {
         this._baseCycleDuration = Engine.localStorage.getNumber(`${this.name}:baseCycleDuration`, this.baseCycleDuration);
         this.profitMultipler = Engine.localStorage.getNumber(`${this.name}:profitMultipler`, this.profitMultipler);
         this.timeInCycle.setValue(Engine.localStorage.getNumber(`${this.name}:timeInCycle`, 0));
-        this.amountOwned.setValue(Engine.localStorage.getNumber(`${this.name}:amountOwned`, this._objectData.initialAmountOwned ?? 0));
+        this.unitsOwned.setValue(Engine.localStorage.getNumber(`${this.name}:unitsOwned`, this._objectData.initialUnitsOwned ?? 0));
         super.restore();
     }
 
@@ -247,7 +257,6 @@ export class VentureBusiness extends Actor<VentureBusinessData> {
         return this._managerCost;
     }
 
-
     /**
      * Returns the sprite component displaying this business's configured icon.
      */
@@ -256,10 +265,10 @@ export class VentureBusiness extends Actor<VentureBusinessData> {
     }
 
     /**
-     * Returns the text component displaying the amount of this business that have been purchased.
+     * Returns the text component displaying the current profit value of this business.
      */
-    public get amountOwnedTextComponent(): TextComponent {
-        return this.displayComponents[VentureBusinessUIParts.AMOUNT_OWNED] as TextComponent;
+    public get profitTextComponent(): TextComponent {
+        return this.displayComponents[VentureBusinessUIParts.PROFIT] as TextComponent;
     }
 
     /**
@@ -289,7 +298,7 @@ export class VentureBusiness extends Actor<VentureBusinessData> {
     public get profit(): number {
         return (
             this.baseProfit
-            * this.amountOwned.getValue()
+            * this.unitsOwned.getValue()
             * this.profitMultipler
             * AdVentureCapitalist.getInstance().bank.globalProfitMultiplier.getValue()
         );
@@ -306,16 +315,30 @@ export class VentureBusiness extends Actor<VentureBusinessData> {
         for (let i = 0; i < n; ++i) {
 
             // In the special case that this would be the first unit, don't apply the exponent to it.
-            if (i === 0 && (this.amountOwned.getValue() === 0 || this.amountOwned.getValue() === this._objectData.initialAmountOwned)) {
+            if (i === 0 && (this.unitsOwned.getValue() === 0 || this.unitsOwned.getValue() === this._objectData.initialUnitsOwned)) {
                 cost += this.baseCost;
 
             } else {
 
                 // Otherwise, each units costs 7% more than the last.
-                const power = Math.max(1, this.amountOwned.getValue() - 1 + i);
+                const power = Math.max(1, this.unitsOwned.getValue() - 1 + i);
                 cost += (this.baseCost * Math.pow(1.07, power));
             }
         }
         return cost;
+    }
+
+    /**
+     * Returns the text component displaying the amount of this business that have been purchased.
+     */
+    protected get unitsOwnedTextComponent(): TextComponent {
+        return this.displayComponents[VentureBusinessUIParts.UNITS_OWNED] as TextComponent;
+    }
+
+    /**
+     * Returns the text component displaying the timer before this business's next cycle completes.
+     */
+    protected get timerAreaComponent(): TextComponent {
+        return this.displayComponents[VentureBusinessUIParts.TIMER_AREA] as TextComponent;
     }
 }

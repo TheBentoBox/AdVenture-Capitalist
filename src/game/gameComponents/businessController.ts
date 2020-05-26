@@ -80,7 +80,7 @@ export class BusinessController extends ControllerComponent<VentureBusiness> {
 
         // Simulate the time that has passed since the last play.
         const lastPlayTime: number = Engine.localStorage.getNumber("LastPlayed");
-        if (lastPlayTime !== undefined && this.actor.amountOwned.getValue() > 0 && wasRunning) {
+        if (lastPlayTime !== undefined && this.actor.unitsOwned.getValue() > 0 && wasRunning) {
 
             // Determine how far past the end of the cycle the actor would have "overshot".
             const timePassedInSeconds = ((Date.now() - lastPlayTime) / 1000);
@@ -118,6 +118,7 @@ export class BusinessController extends ControllerComponent<VentureBusiness> {
         }
 
         this.updateBuyButtonEnabledStates();
+        this.updateBusinessProfitLabel();
         this.updateBuyButtonPriceLabel(AdVentureCapitalist.getInstance().bank.purchaseMode.getValue());
     }
 
@@ -163,7 +164,7 @@ export class BusinessController extends ControllerComponent<VentureBusiness> {
      * This ensures that the controller is running if the user interacted with the business.
      */
     private onBusinessClicked(): void {
-        if (this.actor.amountOwned.getValue() > 0) {
+        if (this.actor.unitsOwned.getValue() > 0) {
             this.isActive = true;
         }
     }
@@ -176,10 +177,11 @@ export class BusinessController extends ControllerComponent<VentureBusiness> {
         const unitCost = this.actor.getNextNextNthUnitsCost();
         const balance = AdVentureCapitalist.getInstance().bank.balance;
 
-        this.actor.amountOwned.adjust(purchaseMode);
+        this.actor.unitsOwned.adjust(purchaseMode);
         balance.adjust(-unitCost);
 
         this.updateBuyButtonPriceLabel(purchaseMode);
+        this.updateBusinessProfitLabel();
         this.updateBuyButtonEnabledStates();
     }
 
@@ -190,7 +192,7 @@ export class BusinessController extends ControllerComponent<VentureBusiness> {
     private onManagerBuy(adjustBalance: boolean = true): void {
         this.hasManager = true;
         this._managerButton.isEnabled = false;
-        this._managerButton.container.alpha = 0;
+        this._managerButton.container.alpha = 0.5;
 
         if (adjustBalance) {
             AdVentureCapitalist.getInstance().bank.balance.adjust(-this.actor.managerCost);
@@ -210,6 +212,13 @@ export class BusinessController extends ControllerComponent<VentureBusiness> {
     }
 
     /**
+     * Updates the label on the business actor which displays the current profit value of the business.
+     */
+    private updateBusinessProfitLabel(): void {
+        this.actor.profitTextComponent.setText(String(this.actor.profit));
+    }
+
+    /**
      * Updates the state of the business's buy button as well as its associated manager button.
      */
     private updateBuyButtonEnabledStates(): void {
@@ -220,7 +229,7 @@ export class BusinessController extends ControllerComponent<VentureBusiness> {
         this._managerButton.isEnabled = (
             !this.hasManager &&
             this.actor.managerCost <= currentBalance &&
-            this.actor.amountOwned.getValue() > 0
+            this.actor.unitsOwned.getValue() > 0
         );
     }
 }

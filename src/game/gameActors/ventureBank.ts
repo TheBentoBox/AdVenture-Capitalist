@@ -88,14 +88,14 @@ export class VentureBank extends Actor<VentureBankData> {
         this.managerButtons = {};
 
         // Create the text component that will display the balance.
-        const balanceText = new TextComponent({ name: "balanceText", text: this.balance, format: TextFormatMode.CURRENCY });
+        const balanceText = new TextComponent({ name: "balanceText", text: this.balance, maxSize: { x: 415 }, format: TextFormatMode.CURRENCY });
         balanceText.setStyle(new PIXI.TextStyle({
             fill: 0xFFFFFF,
             fontSize: "64px",
             stroke: 0x888888,
             strokeThickness: 7
         }));
-        balanceText.transform.position.set(25, 0);
+        balanceText.transform.position.set(10, 0);
         this.addDisplayComponent(balanceText);
 
         // Trigger an initial balance update and register business cycle completions to balance updates.
