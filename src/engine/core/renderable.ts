@@ -60,7 +60,7 @@ export abstract class Renderable<T extends RenderableData = RenderableData> impl
     /**
      * Subscription callback for when our transform's position changes to update the internal one.
      */
-    public onPositionChanged(): void {
+    private onPositionChanged(): void {
         this.container.transform.position.x = this.transform.position.x;
         this.container.transform.position.y = this.transform.position.y;
     }
@@ -68,7 +68,7 @@ export abstract class Renderable<T extends RenderableData = RenderableData> impl
     /**
      * Subscription callback for when our transform's scale changes to update the internal one.
      */
-    public onScaleChanged(): void {
+    private onScaleChanged(): void {
         this.container.transform.scale.x = this.transform.scale.x;
         this.container.transform.scale.y = this.transform.scale.y;
     }
@@ -76,7 +76,7 @@ export abstract class Renderable<T extends RenderableData = RenderableData> impl
     /**
      * Subscription callback for when our transform's rotation changes to update the internal one.
      */
-    public onRotationChanged(): void {
+    private onRotationChanged(): void {
         this.container.transform.rotation = this.transform.rotation.z;
     }
 }

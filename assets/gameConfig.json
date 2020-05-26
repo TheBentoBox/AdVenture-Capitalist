@@ -1,6 +1,7 @@
 {
     "assets": {
         "assets/images/businessBackplate.png": "sprite",
+        "assets/images/managerBackplate.png": "sprite",
         "assets/images/progressArrowEmpty.png": "sprite",
         "assets/images/progressArrowFilled.png": "sprite",
         "assets/images/buyButton.png": "sprite",
@@ -119,6 +120,12 @@
                         "y": 85
                     }
                 }
+            }
+        },
+        "baseManagerButtonData": {
+            "background": {
+                "name": "buyManagerButtonBackground",
+                "assetName": "managerBackplate.png"
             }
         },
         "businesses": [

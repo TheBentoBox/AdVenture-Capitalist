@@ -44,7 +44,7 @@ export class AdVentureCapitalist extends Game {
     /**
      * Gets the running game instance.
      */
-    public static get instance(): AdVentureCapitalist {
+    public static getInstance(): AdVentureCapitalist {
         return AdVentureCapitalist._instance;
     }
 
@@ -68,7 +68,7 @@ export class AdVentureCapitalist extends Game {
         this._gameArea = new Level("GameArea", true);
 
         // Create the bank that will manage the balance.
-        const bank = new VentureBank({ name: "mainBank" });
+        const bank = new VentureBank({ name: "mainBank", baseManagerButtonData: this._gameData.baseManagerButtonData, businesses: this._gameData.businesses });
         this._gameArea.root.addChild(bank);
 
         const baseBusinessData = this._gameData.baseBusinessData ?? {};

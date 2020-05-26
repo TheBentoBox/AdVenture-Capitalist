@@ -2,15 +2,20 @@ import { ControllerComponent } from "../../engine/components/controller/controll
 import { VentureBusiness } from "../gameActors/ventureBusiness";
 import { formatTime } from "../utilities";
 import { GameEvent } from "../gameEvents";
-import { Container } from "pixi.js";
 import { InteractionType } from "../../engine/enums/interactionEvents";
 import { AdVentureCapitalist } from "../adVentureCapitalist";
 import { PurchaseMode } from "../gameActors/ventureBank";
+import { Button } from "../../engine/actors/ui/button";
 
 /**
  * Controls running a singular business.
  */
 export class BusinessController extends ControllerComponent<VentureBusiness> {
+
+    /**
+     * The button created by the bank which allows for purchasing of this business's manager.
+     */
+    private _managerButton: Button;
 
     /**
      * The mask attached to the owning business's progress bar.
@@ -33,6 +38,7 @@ export class BusinessController extends ControllerComponent<VentureBusiness> {
     public constructor(name: string, business: VentureBusiness) {
         super(name, business);
         this.isActive = false;
+        this._managerButton = AdVentureCapitalist.getInstance().bank.managerButtons[business.name];
         business.timerTextComponent.setText(formatTime(this.actor.baseCycleDuration));
 
         business.iconComponent.container.interactive = true;
@@ -41,9 +47,11 @@ export class BusinessController extends ControllerComponent<VentureBusiness> {
         business.progressBar.container.interactive = true;
         business.progressBar.container.addListener(InteractionType.MOUSE_CLICK, this.onBusinessClicked.bind(this));
 
+        business.buyButton.amountLabel.attachTo(AdVentureCapitalist.getInstance().bank.purchaseMode);
         business.buyButton.onClick.subscribe(this, this.onBusinessBuy.bind(this));
-        AdVentureCapitalist.instance.bank.purchaseMode.subscribe(this, this.updateBuyButtonPriceLabel.bind(this));
-        AdVentureCapitalist.instance.bank.balance.subscribe(this, this.updateBuyButtonEnabledState.bind(this));
+        this._managerButton.onClick.subscribe(this, this.onManagerBuy.bind(this));
+        AdVentureCapitalist.getInstance().bank.purchaseMode.subscribe(this, this.updateBuyButtonPriceLabel.bind(this));
+        AdVentureCapitalist.getInstance().bank.balance.subscribe(this, this.updateBuyButtonEnabledStates.bind(this));
     }
 
     /**
@@ -69,7 +77,7 @@ export class BusinessController extends ControllerComponent<VentureBusiness> {
         }
 
         // Cycle complete, inform the rest of the game and reset.
-        GameEvent.CYCLE_COMPLETE.emit(this.actor);
+        GameEvent.ON_CYCLE_COMPLETE.emit(this.actor);
         this.actor.timerTextComponent.setText(formatTime(this.actor.baseCycleDuration));
         this.actor.timeInCycle.setValue(0);
         this._progressBarMask.scale.x = 0;
@@ -95,24 +103,46 @@ export class BusinessController extends ControllerComponent<VentureBusiness> {
      * Callback for when the user attempts to buy more units of this controller's business.
      */
     private onBusinessBuy(): void {
-        const purchaseMode: PurchaseMode = AdVentureCapitalist.instance.bank.purchaseMode.getValue();
+        const purchaseMode: PurchaseMode = AdVentureCapitalist.getInstance().bank.purchaseMode.getValue();
         const unitCost = this.actor.getNextNextNthUnitsCost();
-        const balance = AdVentureCapitalist.instance.bank.balance;
+        const balance = AdVentureCapitalist.getInstance().bank.balance;
 
-        if (unitCost <= balance.getValue()) {
-            this.actor.amountOwned.adjust(1);
-            balance.adjust(-unitCost);
-        }
+        this.actor.amountOwned.adjust(purchaseMode);
+        balance.adjust(-unitCost);
 
         this.updateBuyButtonPriceLabel(purchaseMode);
-        this.updateBuyButtonEnabledState();
+        this.updateBuyButtonEnabledStates();
     }
 
+    /**
+     * Triggered when the manager button for this business is clicked while enabled.
+     */
+    private onManagerBuy(): void {
+        this.hasManager = true;
+        this._managerButton.isEnabled = false;
+        this._managerButton.container.alpha = 0;
+        AdVentureCapitalist.getInstance().bank.balance.adjust(-this.actor.managerCost);
+
+        // The manager could potentially be purchased while a cycle wasn't running.
+        // That being the case, ensure the controller is enabled at this point.
+        this.isActive = true;
+    }
+
+    /**
+     * Updates the label on the buy button with the cost of the next X units based on the global purchase mode.
+     * @param purchaseMode The current global purchase mode.
+     */
     private updateBuyButtonPriceLabel(purchaseMode: PurchaseMode): void {
         this.actor.buyButton.priceLabel.setText(String(this.actor.getNextNextNthUnitsCost(purchaseMode)));
     }
 
-    private updateBuyButtonEnabledState(): void {
-        this.actor.buyButton.isEnabled = (this.actor.getNextNextNthUnitsCost() <= AdVentureCapitalist.instance.bank.balance.getValue());
+    /**
+     * Updates the state of the business's buy button as well as its associated manager button.
+     * The manager button cannot become enabled if it has already been purchased.
+     */
+    private updateBuyButtonEnabledStates(): void {
+        const currentBalance = AdVentureCapitalist.getInstance().bank.balance.getValue();
+        this.actor.buyButton.isEnabled = (this.actor.getNextNextNthUnitsCost() <= currentBalance);
+        this._managerButton.isEnabled = (!this.hasManager && this.actor.managerCost <= currentBalance);
     }
 }

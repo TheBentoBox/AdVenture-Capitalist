@@ -8,7 +8,7 @@ import { VectorData, Vector3 } from "../../math/vector3";
  * The data shape that gets passed into the display component constructor for configuration purposes.
  */
 export interface TextComponentData extends DisplayComponentData {
-    text: string | Observable<number> | Observable<string>,
+    text: string | number | Observable<string> | Observable<number>,
     maxSize?: VectorData,
     format?: TextFormatMode,
     style?: Partial<PIXI.TextStyle>
@@ -72,7 +72,8 @@ export class TextComponent extends DisplayComponent<PIXI.Text, TextComponentData
         // Default the starting text to an empty string if the text was set to watch an observable.
         const isObservable = (this._objectData.text instanceof Observable);
         let startingText: string = (isObservable ? "" : String(this._objectData.text));
-        this._internalAssetData = new PIXI.Text(startingText, this._objectData.style);
+        this._internalAssetData = new PIXI.Text("", this._objectData.style);
+        this.setText(startingText);
 
         // Attach to the configured observable if applicable.
         if (isObservable) {

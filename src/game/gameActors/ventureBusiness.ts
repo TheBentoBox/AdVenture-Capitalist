@@ -49,7 +49,7 @@ enum VentureBusinessUIParts {
  * The shape of the data that should be passed into the business on creation.
  * This is drawn from the game config.
  */
-interface VentureBusinessData extends ActorData {
+export interface VentureBusinessData extends ActorData {
 
     /**
      * The config for sprite components which should be displayed at the back of the business view.
@@ -87,6 +87,11 @@ interface VentureBusinessData extends ActorData {
     baseCycleDuration: number,
 
     /**
+     * The amount this business's manager costs.
+     */
+    managerCost: number,
+
+    /**
      * The number of units of this business that should be owned by default for a fresh game.
      */
     initialAmountOwned: number,
@@ -113,6 +118,11 @@ export class VentureBusiness extends Actor<VentureBusinessData> {
      * This can decrease based on upgrades.
      */
     public readonly baseCycleDuration: number;
+
+    /**
+     * The amount this business's manager costs.
+     */
+    public readonly managerCost: number;
 
     /**
      * The profit multiplier applied to this business.
@@ -142,6 +152,7 @@ export class VentureBusiness extends Actor<VentureBusinessData> {
         this.baseCost = this._objectData.baseCost;
         this.baseProfit = this._objectData.baseProfit;
         this.baseCycleDuration = this._objectData.baseCycleDuration;
+        this.managerCost = this._objectData.managerCost;
 
         // Attach the back sprites.
         for (let i = 0; i < businessData.backSprites.length; ++i) {
@@ -157,10 +168,10 @@ export class VentureBusiness extends Actor<VentureBusinessData> {
         // Attach the timer last so it appears on top of the progress bar.
         this.addDisplayComponent(new TextComponent({ name: VentureBusinessUIParts.TIMER, text: "", style: { fontFamily: "Arial", fill: 0xFFFFFF } }));
 
-        // Add the buy button.
+        // Add the buy button after everything but before the controller.
         this.addChild(new BusinessBuyButton({ ...this._objectData.buyButton, name: VentureBusinessUIParts.BUY_BUTTON }))
 
-        // Add the controller.
+        // Add the controller. This comes last because it requires everything else to exist to hook into.
         this.addControllerComponent(new BusinessController(this.name + "Controller", this));
     }
 
@@ -224,7 +235,12 @@ export class VentureBusiness extends Actor<VentureBusinessData> {
      * Gets the profit of this business based on the number of owned units.
      */
     public get profit(): number {
-        return (this.baseProfit * this.amountOwned.getValue() * this.profitMultipler * AdVentureCapitalist.instance.bank.globalProfitMultiplier.getValue());
+        return (
+            this.baseProfit
+            * this.amountOwned.getValue()
+            * this.profitMultipler
+            * AdVentureCapitalist.getInstance().bank.globalProfitMultiplier.getValue()
+        );
     }
 
     /**
@@ -232,7 +248,7 @@ export class VentureBusiness extends Actor<VentureBusinessData> {
      * @param n The theoretical purchase amount. Defaults to 1.
      * @returns The amount the next n units of this business would cost.
      */
-    public getNextNextNthUnitsCost(n: number = AdVentureCapitalist.instance.bank.purchaseMode.getValue()): number {
+    public getNextNextNthUnitsCost(n: number = AdVentureCapitalist.getInstance().bank.purchaseMode.getValue()): number {
 
         let cost = 0;
         for (let i = 0; i < n; ++i) {
